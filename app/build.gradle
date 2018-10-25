@@ -4,6 +4,10 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+androidExtensions {
+    experimental = true
+}
+
 android {
     compileSdkVersion 28
     defaultConfig {
@@ -25,13 +29,17 @@ android {
 
 dependencies {
 
-    def version_xAndroid="1.0.0"
+    def xAndroid_version= "1.0.0"
+    def lifecycle_version = "2.0.0"
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation "androidx.appcompat:appcompat:$version_xAndroid"
+    implementation "androidx.appcompat:appcompat:$xAndroid_version"
     implementation "androidx.constraintlayout:constraintlayout:2.0.0-alpha2"
+
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-livedata:$lifecycle_version"
 
     implementation 'com.google.android.material:material:1.0.0'
 
