@@ -2,6 +2,7 @@ package ml.dcxo.x.obwei
 
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
+import java.time.Duration
 
 sealed class Model: Parcelable
 
@@ -12,7 +13,9 @@ sealed class Model: Parcelable
 @Parcelize data class Song(
 	var id: Int = 0, var title: String = "",
 	var albumId: Int = 0, var albumTitle: String = "",
-	var artistId: Int = 0, var artistName: String = ""
+	var artistId: Int = 0, var artistName: String = "",
+	var year: Int = 0, var duration: Long = 0,
+	var modDate: Long = 0, var filePath: String = ""
 ): Model()
 
 @Parcelize data class Album(
