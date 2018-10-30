@@ -25,3 +25,7 @@ sealed class Model: Parcelable
 	var id: Int = 0, var name: String = "",
 	var trackList: ArrayList<Song> = arrayListOf()
 ): Model()
+
+@Parcelize data class Playlist(
+	var name: String = "", var trackList: ArrayList<Song> = arrayListOf()
+): Model()

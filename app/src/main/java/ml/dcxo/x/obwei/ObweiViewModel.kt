@@ -11,7 +11,7 @@ class ObweiViewModel(app: Application): AndroidViewModel(app) {
 	var songs: LiveData<ArrayList<Song>> = MutableLiveData()
 	var albums: LiveData<ArrayList<Album>> = MutableLiveData()
 	var artists: LiveData<ArrayList<Artist>> = MutableLiveData()
-	//TODO: Add Playlists
+	var playlists: LiveData<ArrayList<Playlist>> = MutableLiveData()
 
 	//TODO: Make _init_
 
