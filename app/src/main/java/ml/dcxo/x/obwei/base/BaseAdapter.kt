@@ -32,7 +32,7 @@ abstract class BaseAdapter<Item: Model, VH: BaseViewHolder<Item>>: RecyclerView.
 	abstract fun areContentsTheSame(oldItem: Item, newItem: Item): Boolean
 
 	override fun getItemCount(): Int = data.size
-	override fun onBindViewHolder(holder: VH, position: Int) = holder.asyncBind(data[position])
+	override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(data[position])
 
 	private inner class Ziff(private val newData: ArrayList<Item>): DiffUtil.Callback() {
 		override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =

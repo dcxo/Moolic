@@ -6,7 +6,10 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
         <item name="android:textAppearance">@style/Obwei.TextAppearance</item>
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:maxLines">1</item>
 
         <item name="android:windowTranslucentStatus" tools:ignore="NewApi">true</item>
 

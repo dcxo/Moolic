@@ -39,6 +39,8 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlinx_version"
 
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    implementation "androidx.core:core-ktx:$xAndroid_version"
     implementation "androidx.appcompat:appcompat:$xAndroid_version"
     implementation "androidx.constraintlayout:constraintlayout:2.0.0-alpha2"
 

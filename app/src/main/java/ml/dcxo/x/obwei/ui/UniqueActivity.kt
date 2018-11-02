@@ -9,13 +9,16 @@ import kotlinx.android.synthetic.main.unique_activity.*
 import ml.dcxo.x.obwei.viewModel.ObweiViewModel
 import ml.dcxo.x.obwei.R
 import ml.dcxo.x.obwei.base.BaseNavFragment
-import ml.dcxo.x.obwei.ui.fragments.nav.SongsNavFragment
+import ml.dcxo.x.obwei.ui.fragments.nav.*
+import ml.dcxo.x.obwei.utils.navFragmentsKey
 
 class UniqueActivity : AppCompatActivity(), BottomNavigationView.OnNavigationItemSelectedListener {
 
 	val obweiViewModel: ObweiViewModel by lazy { ViewModelProviders.of(this).get(ObweiViewModel::class.java) }
 
 	override fun onCreate(savedInstanceState: Bundle?) {
+
+		obweiViewModel
 
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.unique_activity)
@@ -27,15 +30,15 @@ class UniqueActivity : AppCompatActivity(), BottomNavigationView.OnNavigationIte
 
 	override fun onNavigationItemSelected(p0: MenuItem): Boolean {
 
-		val navFragment: BaseNavFragment<*,*>
-
-		when (p0.itemId) {
-			R.id.songsMenuOption -> navFragment = SongsNavFragment()
+		val navFragment = when (p0.itemId) {
+			R.id.songsMenuOption -> SongsNavFragment()
+			R.id.albumsMenuOption -> AlbumsNavFragment()
+			R.id.artistsMenuOption -> ArtistsNavFragment()
 			else -> return false
 		}
 
 		supportFragmentManager.beginTransaction()
-			.replace(R.id.navHost, navFragment, "navFragment")
+			.replace(R.id.navHost, navFragment, navFragmentsKey)
 			.commit()
 
 		return true
