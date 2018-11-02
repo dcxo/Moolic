@@ -11,17 +11,7 @@ import ml.dcxo.x.obwei.viewModel.Model
  */
 abstract class BaseViewHolder<Item: Model>(itemView: View): RecyclerView.ViewHolder(itemView) {
 
-	private lateinit var job: Job
-
 	abstract fun bind(i: Item)
-
-	fun asyncBind(i: Item) = runBlocking {
-
-		job = launch(start = CoroutineStart.LAZY) { bind(i) }
-		job.cancelAndJoin()
-
-	}
-
-	fun recycler() { if (this::job.isInitialized) job.cancel() }
+	abstract fun recycle()
 
 }

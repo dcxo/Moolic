@@ -1,6 +1,9 @@
 package ml.dcxo.x.obwei.viewModel
 
+import android.content.ContentUris
+import android.net.Uri
 import android.os.Parcelable
+import kotlinx.android.parcel.IgnoredOnParcel
 import kotlinx.android.parcel.Parcelize
 
 sealed class Model: Parcelable
@@ -15,13 +18,21 @@ sealed class Model: Parcelable
 	var artistId: Int = 0, var artistName: String = "",
 	var year: Int = 0, var duration: Long = 0,
 	var modDate: Long = 0, var filePath: String = ""
-): Model()
+): Model() {
+	@IgnoredOnParcel val getAlbumArtURI: String = ContentUris.withAppendedId(
+			Uri.parse("content://media/external/audio/albumart"),
+			albumId.toLong()).toString()
+}
 
 @Parcelize data class Album(
 	var id: Int = 0, var title: String = "",
 	var artistId: Int = 0, var artistName: String = "",
 	var trackList: ArrayList<Song> = arrayListOf()
-): Model()
+): Model() {
+	@IgnoredOnParcel val getAlbumArtURI: String = ContentUris.withAppendedId(
+		Uri.parse("content://media/external/audio/albumart"),
+		id.toLong()).toString()
+}
 
 @Parcelize data class Artist(
 	var id: Int = 0, var name: String = "",

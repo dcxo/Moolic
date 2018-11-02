@@ -13,6 +13,7 @@ object AlbumsProvider {
 		val albums = arrayListOf<Album>()
 
 		songs.forEach { createOrGetAlbum(it, albums).trackList.add(it) }
+		albums.sortBy { it.title }
 
 		return albums
 

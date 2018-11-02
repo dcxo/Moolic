@@ -24,6 +24,9 @@ class ArtistsAdapter: BaseAdapter<Artist, ArtistsAdapter.ArtistViewHolder>() {
 			itemView.artistName.text = i.name
 
 		}
+		override fun recycle() {
+
+		}
 
 	}
 

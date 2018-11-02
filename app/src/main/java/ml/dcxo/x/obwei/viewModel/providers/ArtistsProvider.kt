@@ -13,7 +13,7 @@ object ArtistsProvider {
 		val artists = arrayListOf<Artist>()
 
 		songs.forEach { createOrGetArtist(it, artists).trackList.add(it) }
-		//artists.sortBy { it.name }
+		artists.sortBy { it.name }
 
 		return artists
 
@@ -21,7 +21,7 @@ object ArtistsProvider {
 
 	private fun createOrGetArtist(song: Song, artists: ArrayList<Artist>): Artist {
 
-		val name = song.artistName.split(",", "feat", "ft", "x", ignoreCase = true).first().trim('(', ' ', ')')
+		val name = song.artistName.split(",", "feat", "ft", "x", ignoreCase = true).first().trim('(', ')')
 
 		return try {
 			artists.first { name == it.name }

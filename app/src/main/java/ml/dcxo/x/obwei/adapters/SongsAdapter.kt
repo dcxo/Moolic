@@ -2,10 +2,13 @@ package ml.dcxo.x.obwei.adapters
 
 import android.view.*
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.Target
 import kotlinx.android.synthetic.main.song_recycleritem.view.*
 import ml.dcxo.x.obwei.R
 import ml.dcxo.x.obwei.base.BaseAdapter
 import ml.dcxo.x.obwei.base.BaseViewHolder
+import ml.dcxo.x.obwei.utils.TranscoderAmBitmap
 import ml.dcxo.x.obwei.viewModel.Song
 
 /**
@@ -21,11 +24,18 @@ class SongsAdapter: BaseAdapter<Song, SongsAdapter.SongViewHolder>() {
 
 	inner class SongViewHolder(itemView: View): BaseViewHolder<Song>(itemView) {
 
+		var t: Target<*>? = null
+
 		override fun bind(i: Song) {
 
 			itemView.songTitle.text = i.title
 			itemView.artistName.text = i.artistName
 
+			t = Glide.with(itemView.context).load(i.getAlbumArtURI)
+				.crossFade(440).into(itemView.thumbnailAlbumArt)
+
+		}
+		override fun recycle() {
 		}
 
 	}
