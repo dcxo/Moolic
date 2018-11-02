@@ -1,8 +1,8 @@
-package ml.dcxo.x.obwei
+package ml.dcxo.x.obwei.viewModel
 
 import android.app.Application
 import androidx.lifecycle.*
-import ml.dcxo.x.obwei.providers.*
+import ml.dcxo.x.obwei.viewModel.providers.*
 
 /**
  * Created by David on 25/10/2018 for ObweiX

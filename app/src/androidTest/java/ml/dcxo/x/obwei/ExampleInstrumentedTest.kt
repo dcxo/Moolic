@@ -3,15 +3,12 @@ package ml.dcxo.x.obwei
 import android.util.Log
 import androidx.test.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
-import ml.dcxo.x.obwei.providers.ArtistsProvider
-import ml.dcxo.x.obwei.providers.SongsProvider
+import ml.dcxo.x.obwei.viewModel.providers.ArtistsProvider
+import ml.dcxo.x.obwei.viewModel.providers.SongsProvider
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.util.logging.Level
-import java.util.logging.Logger
 import kotlin.system.measureNanoTime
-import kotlin.system.measureTimeMillis
 
 /**
  * Instrumented test, which will execute on an Android device.

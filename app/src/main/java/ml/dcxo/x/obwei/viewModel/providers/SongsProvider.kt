@@ -1,9 +1,9 @@
-package ml.dcxo.x.obwei.providers
+package ml.dcxo.x.obwei.viewModel.providers
 
 import android.content.Context
 import android.database.Cursor
 import android.provider.MediaStore
-import ml.dcxo.x.obwei.Song
+import ml.dcxo.x.obwei.viewModel.Song
 
 /**
  * Created by David on 30/10/2018 for ObweiX

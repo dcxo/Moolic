@@ -1,8 +1,7 @@
-package ml.dcxo.x.obwei
+package ml.dcxo.x.obwei.viewModel
 
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
-import java.time.Duration
 
 sealed class Model: Parcelable
 

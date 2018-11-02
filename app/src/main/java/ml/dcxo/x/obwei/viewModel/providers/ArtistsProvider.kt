@@ -1,7 +1,7 @@
-package ml.dcxo.x.obwei.providers
+package ml.dcxo.x.obwei.viewModel.providers
 
-import ml.dcxo.x.obwei.Artist
-import ml.dcxo.x.obwei.Song
+import ml.dcxo.x.obwei.viewModel.Artist
+import ml.dcxo.x.obwei.viewModel.Song
 
 /**
  * Created by David on 30/10/2018 for ObweiX

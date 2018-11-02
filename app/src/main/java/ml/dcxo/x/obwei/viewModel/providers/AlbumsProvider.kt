@@ -1,9 +1,7 @@
-package ml.dcxo.x.obwei.providers
+package ml.dcxo.x.obwei.viewModel.providers
 
-import android.content.Context
-import ml.dcxo.x.obwei.Album
-import ml.dcxo.x.obwei.Song
-import kotlin.contracts.contract
+import ml.dcxo.x.obwei.viewModel.Album
+import ml.dcxo.x.obwei.viewModel.Song
 
 /**
  * Created by David on 30/10/2018 for ObweiX
