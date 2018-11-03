@@ -15,6 +15,9 @@ import kotlin.properties.Delegates
  */
 abstract class BaseAdapter<Item: Model, VH: BaseViewHolder<Item>>: RecyclerView.Adapter<VH>() {
 
+	var click: ((Item, Int)->Unit)? = null
+	var longClick: ((Item, Int)->Unit)? = null
+
 	val data: ArrayList<Item> by Delegates.observable(arrayListOf()) {_, _, _ ->
 		notifyDataSetChanged()
 	}
@@ -32,7 +35,7 @@ abstract class BaseAdapter<Item: Model, VH: BaseViewHolder<Item>>: RecyclerView.
 	abstract fun areContentsTheSame(oldItem: Item, newItem: Item): Boolean
 
 	override fun getItemCount(): Int = data.size
-	override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(data[position])
+	override fun onBindViewHolder(holder: VH, position: Int) = holder.bind(data[position], position, click, longClick)
 	override fun onViewRecycled(holder: VH) = holder.recycle()
 
 	private inner class Ziff(private val newData: ArrayList<Item>): DiffUtil.Callback() {

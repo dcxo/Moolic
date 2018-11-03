@@ -12,6 +12,8 @@ import ml.dcxo.x.obwei.ui.UniqueActivity
  */
 abstract class BaseFragment: Fragment() {
 
+	val uiInteractions; get() = (activity as UniqueActivity).uiInteractions
+
 	@get:LayoutRes abstract val layoutInflated: Int
 
 	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

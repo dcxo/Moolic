@@ -9,10 +9,10 @@ import ml.dcxo.x.obwei.viewModel.providers.*
  */
 class ObweiViewModel(app: Application): AndroidViewModel(app) {
 
-	var songs: MutableLiveData<ArrayList<Song>> = MutableLiveData()
-	var albums: MutableLiveData<ArrayList<Album>> = MutableLiveData()
-	var artists: MutableLiveData<ArrayList<Artist>> = MutableLiveData()
-	var playlists: MutableLiveData<ArrayList<Playlist>> = MutableLiveData()
+	private var songs: MutableLiveData<ArrayList<Song>> = MutableLiveData()
+	private var albums: MutableLiveData<ArrayList<Album>> = MutableLiveData()
+	private var artists: MutableLiveData<ArrayList<Artist>> = MutableLiveData()
+	private var playlists: MutableLiveData<ArrayList<Playlist>> = MutableLiveData()
 
 	init {
 		getSongs(true)

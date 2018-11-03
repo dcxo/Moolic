@@ -19,7 +19,8 @@ class ArtistsAdapter: BaseAdapter<Artist, ArtistsAdapter.ArtistViewHolder>() {
 
 	inner class ArtistViewHolder(itemView: View): BaseViewHolder<Artist>(itemView) {
 
-		override fun bind(i: Artist) {
+		override fun bind(i: Artist, position: Int, click: ((Artist, Int) -> Unit)?, longClick: ((Artist, Int) -> Unit)?) {
+			super.bind(i, position, click, longClick)
 
 			itemView.artistName.text = i.name
 

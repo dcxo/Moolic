@@ -9,11 +9,20 @@ import ml.dcxo.x.obwei.base.BaseAdapter
 import ml.dcxo.x.obwei.base.BaseNavFragment
 import ml.dcxo.x.obwei.ui.UniqueActivity
 import ml.dcxo.x.obwei.viewModel.Song
+import java.lang.Exception
 
 /**
  * Created by David on 02/11/2018 for ObweiX
  */
 class SongsNavFragment: BaseNavFragment<Song, SongsAdapter>() {
+
+	override val click: ((Song, Int) -> Unit)? = { song, position ->
+		uiInteractions?.onSongSelected(
+			song,
+			getLiveData().value ?: throw IllegalStateException(),
+			position
+		)
+	}
 
 	override fun getLiveData(): LiveData<ArrayList<Song>> =
 		(activity as UniqueActivity).obweiViewModel.getSongs()

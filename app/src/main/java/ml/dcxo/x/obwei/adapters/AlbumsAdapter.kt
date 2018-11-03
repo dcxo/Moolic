@@ -31,7 +31,8 @@ class AlbumsAdapter: BaseAdapter<Album, AlbumsAdapter.AlbumViewHolder>() {
 
 		var j: Job? = null
 
-		override fun bind(i: Album) {
+		override fun bind(i: Album, position: Int, click: ((Album, Int) -> Unit)?, longClick: ((Album, Int) -> Unit)?) {
+			super.bind(i, position, click, longClick)
 
 			itemView.albumTitle.text = i.title
 			itemView.artistName.text = i.artistName

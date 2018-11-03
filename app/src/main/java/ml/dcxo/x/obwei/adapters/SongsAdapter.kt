@@ -26,7 +26,8 @@ class SongsAdapter: BaseAdapter<Song, SongsAdapter.SongViewHolder>() {
 
 		var t: Target<*>? = null
 
-		override fun bind(i: Song) {
+		override fun bind(i: Song, position: Int, click: ((Song, Int) -> Unit)?, longClick: ((Song, Int) -> Unit)?) {
+			super.bind(i, position, click, longClick)
 
 			itemView.songTitle.text = i.title
 			itemView.artistName.text = i.artistName

@@ -21,12 +21,17 @@ abstract class BaseNavFragment<Item: Model, Adapter: BaseAdapter<Item, *>>: Base
 	override val layoutInflated: Int = R.layout.nav_fragment
 
 	open val decor: RecyclerView.ItemDecoration? = null
+	open val click: ((Item, Int)->Unit)? = null
+	open val longClick: ((Item, Int)->Unit)? = null
 
 	fun View.getAdapter(): Adapter = this.recyclerNav.adapter as Adapter
 
 	override fun editOnCreateView(view: View) {
 
 		val (adapter, lManager) = getAdapterAndLayoutManager(view.context)
+
+		adapter.click = click
+		adapter.longClick = longClick
 
 		view.recyclerNav.adapter = adapter
 		view.recyclerNav.layoutManager = lManager
