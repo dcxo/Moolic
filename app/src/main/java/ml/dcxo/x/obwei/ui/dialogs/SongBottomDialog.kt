@@ -5,7 +5,6 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.*
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import kotlinx.android.synthetic.main.album_recycleritem.view.*
 import kotlinx.android.synthetic.main.bottomsheet_dialog.view.*
 import ml.dcxo.x.obwei.R
 import ml.dcxo.x.obwei.service.UIInteractions
@@ -31,6 +30,13 @@ class SongBottomDialog: BottomSheetDialogFragment() {
 
 		return v
 
+	}
+
+	override fun onDestroyView() {
+
+		view!!.addToQueueOption.setOnClickListener(null)
+
+		super.onDestroyView()
 	}
 
 	companion object {

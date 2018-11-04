@@ -9,8 +9,9 @@ interface PlaybackManager {
 
 	val player: MediaPlayer
 
+	fun MediaPlayer.obweiPrepare()
 	fun MediaPlayer.play()
-	fun MediaPlayer.pause2()
+	fun MediaPlayer.obweiPause()
 	fun MediaPlayer.skipToPrevious()
 	fun MediaPlayer.skipToNext()
 

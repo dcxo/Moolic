@@ -22,6 +22,11 @@ sealed class Model: Parcelable
 	@IgnoredOnParcel val getAlbumArtURI: String = ContentUris.withAppendedId(
 			Uri.parse("content://media/external/audio/albumart"),
 			albumId.toLong()).toString()
+
+	companion object {
+		val NULL = Song()
+	}
+
 }
 
 @Parcelize data class Album(
