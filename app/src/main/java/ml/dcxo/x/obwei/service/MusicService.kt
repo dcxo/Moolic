@@ -24,7 +24,8 @@ class MusicService: Service(), UIInteractions, PlaybackManager {
 
 	lateinit var mSession: MediaSessionCompat
 
-	var liveServiceState = MutableLiveData<ServiceState>()
+	/* Service state vars */
+	val liveServiceState = MutableLiveData<ServiceState>()
 	var cSong: Song by Delegates.observable(Song()) {_, _, newSong ->
 		liveServiceState.postValue( ServiceState(cSong = newSong) )
 	}
@@ -40,18 +41,21 @@ class MusicService: Service(), UIInteractions, PlaybackManager {
 	var cRepeatMode by Delegates.observable( PlaybackStateCompat.REPEAT_MODE_NONE ) { _, _, newRepeatMode ->
 		liveServiceState.postValue( ServiceState(cRepeatMode = newRepeatMode) )
 	}
+	/* Queue vars */
+	val liveQueue = MutableLiveData<ArrayList<Song>>()
+	/* Current player progress vars */
+	val liveCurrentPlayerProgress = MutableLiveData<Int>()
 
-	val mBinder = MusicServiceBinder()
-	val callback = object : MediaSessionCompat.Callback(){
+	private val mBinder = MusicServiceBinder()
+	private val callback = object : MediaSessionCompat.Callback(){
 		override fun onPlay() = player.play()
 		override fun onPause() = player.pause2()
 		override fun onSkipToPrevious() = player.skipToPrevious()
 		override fun onSkipToNext() = player.skipToNext()
 	}
-	val pauseJob = GlobalScope.launch(start = CoroutineStart.LAZY) {
+	private val pauseJob = GlobalScope.launch(start = CoroutineStart.LAZY) {
 
-		delay( 10_000L )
-
+		delay( 600_000L )
 		stopSelf()
 
 	}
@@ -84,6 +88,9 @@ class MusicService: Service(), UIInteractions, PlaybackManager {
 	override fun onIndexSelected(selectedIndex: Int) {
 		TODO("onIndexSelected: To be implemented")
 	}
+	override fun onAddToQueue(song: Song) {
+		TODO("onAddToQueue: To be implemented")
+	}
 
 	override fun MediaPlayer.play() {
 
@@ -107,11 +114,11 @@ class MusicService: Service(), UIInteractions, PlaybackManager {
 
 	inner class MusicServiceBinder: Binder() {
 		val uiInteractions; get() = this@MusicService
-		val liveData: Triple<LiveData<ServiceState>, Unit, Unit>
+		val liveData: Triple<LiveData<ServiceState>, LiveData<ArrayList<Song>>, LiveData<Int>>
 			get() = Triple(
 				this@MusicService.liveServiceState,
-				Unit,
-				Unit
+				this@MusicService.liveQueue,
+				this@MusicService.liveCurrentPlayerProgress
 			)
 	}
 	inner class ServiceState(

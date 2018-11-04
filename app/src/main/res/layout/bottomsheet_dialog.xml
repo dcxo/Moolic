@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent">
+
+	<TextView
+		android:id="@+id/songTitle"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:padding="8dp"
+		android:textSize="24sp"
+		android:textAppearance="@style/TextAppearance.Obwei.Headline3"
+		app:layout_constraintBottom_toTopOf="@+id/addToQueueOption"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintHorizontal_bias="0.5"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toTopOf="parent"
+		app:layout_constraintVertical_bias="0.0"
+		app:layout_constraintVertical_chainStyle="packed"
+		tools:text="SongTitle" />
+
+	<TextView
+		android:id="@+id/addToQueueOption"
+		style="@style/TextAppearance.Obwei.Option"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="@string/addToQueue"
+		app:layout_constraintBottom_toTopOf="@+id/addToPlaylistOption"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@+id/songTitle" />
+
+	<TextView
+		android:id="@+id/addToPlaylistOption"
+		style="@style/TextAppearance.Obwei.Option"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="@string/addToPlaylist"
+		app:layout_constraintBottom_toTopOf="@+id/goToAlbumOption"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintHorizontal_bias="0.5"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@+id/addToQueueOption" />
+
+	<TextView
+		android:id="@+id/goToAlbumOption"
+		style="@style/TextAppearance.Obwei.Option"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="@string/goToAlbum"
+		app:layout_constraintBottom_toTopOf="@+id/goToArtistOption"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintHorizontal_bias="0.5"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@+id/addToPlaylistOption" />
+
+	<TextView
+		android:id="@+id/goToArtistOption"
+		style="@style/TextAppearance.Obwei.Option"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="@string/goToArtist"
+		app:layout_constraintBottom_toTopOf="@+id/editMetadataOption"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintHorizontal_bias="0.5"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@+id/goToAlbumOption" />
+
+	<TextView
+		android:id="@+id/editMetadataOption"
+		style="@style/TextAppearance.Obwei.Option"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="@string/editMetadata"
+		app:layout_constraintBottom_toTopOf="@+id/addToBlacklistOption"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintHorizontal_bias="0.5"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@+id/goToArtistOption" />
+
+	<TextView
+		android:id="@+id/addToBlacklistOption"
+		style="@style/TextAppearance.Obwei.Option"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="@string/addToBlacklist"
+		android:textColor="@color/colorWarn"
+		app:layout_constraintBottom_toTopOf="@+id/removeFromDiskOption"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintHorizontal_bias="0.5"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@+id/editMetadataOption" />
+
+	<TextView
+		android:id="@+id/removeFromDiskOption"
+		style="@style/TextAppearance.Obwei.Option"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="@string/removeFromDisk"
+		android:textColor="@color/colorDanger"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintHorizontal_bias="0.5"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintTop_toBottomOf="@+id/addToBlacklistOption" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -13,5 +13,6 @@ interface UIInteractions {
 	fun onShuffleButtonClicked()
 	fun onRepeatButtonClicked()
 	fun onIndexSelected(selectedIndex: Int)
+	fun onAddToQueue(song: Song)
 
 }

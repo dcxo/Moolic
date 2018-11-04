@@ -35,7 +35,7 @@
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/Obwei.TextAppearance.Headline3"
+            android:textAppearance="@style/TextAppearance.Obwei.Headline3"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toLeftOf="@id/playPauseButton" />
 

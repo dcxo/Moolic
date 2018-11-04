@@ -1,7 +1,17 @@
 <resources>
-    <string name="app_name">ObweiX</string>
-    <string name="songs">Songs</string>
-    <string name="home">Home</string>
-    <string name="albums">Albums</string>
-    <string name="artists">Artists</string>
+	<string name="appName">ObweiX</string>
+
+	<string name="songs">Songs</string>
+	<string name="home">Home</string>
+	<string name="albums">Albums</string>
+	<string name="artists">Artists</string>
+
+	<string name="addToQueue">Add to queue</string>
+	<string name="addToPlaylist">Add to playlist</string>
+	<string name="goToAlbum">Go to album</string>
+	<string name="goToArtist">Go to artist</string>
+	<string name="editMetadata">Edit metadata</string>
+	<string name="addToBlacklist">Add to blacklist</string>
+	<string name="removeFromDisk">Remove from disk</string>
+
 </resources>
