@@ -9,7 +9,7 @@ import ml.dcxo.x.obwei.viewModel.providers.*
  */
 class ObweiViewModel(app: Application): AndroidViewModel(app) {
 
-	private var songs: MutableLiveData<ArrayList<Song>> = MutableLiveData()
+	private var songs: MutableLiveData<Tracklist> = MutableLiveData()
 	private var albums: MutableLiveData<ArrayList<Album>> = MutableLiveData()
 	private var artists: MutableLiveData<ArrayList<Artist>> = MutableLiveData()
 	private var playlists: MutableLiveData<ArrayList<Playlist>> = MutableLiveData()
@@ -20,7 +20,7 @@ class ObweiViewModel(app: Application): AndroidViewModel(app) {
 		getArtist(true)
 	}
 
-	fun getSongs(forced: Boolean = false): LiveData<ArrayList<Song>> {
+	fun getSongs(forced: Boolean = false): LiveData<Tracklist> {
 
 		if (songs.value.isNullOrEmpty() || forced)
 			songs.postValue(SongsProvider.getSongs(getApplication()))

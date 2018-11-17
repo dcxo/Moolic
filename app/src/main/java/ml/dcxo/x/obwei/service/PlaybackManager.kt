@@ -13,6 +13,6 @@ interface PlaybackManager {
 	fun MediaPlayer.play()
 	fun MediaPlayer.obweiPause()
 	fun MediaPlayer.skipToPrevious()
-	fun MediaPlayer.skipToNext()
+	fun MediaPlayer.skipToNext(force: Boolean)
 
 }

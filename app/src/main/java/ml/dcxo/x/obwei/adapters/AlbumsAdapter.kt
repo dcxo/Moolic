@@ -6,13 +6,13 @@ import android.view.*
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.animation.GlideAnimation
 import com.bumptech.glide.request.target.BitmapImageViewTarget
-import kotlinx.android.synthetic.main.album_recycleritem.view.*
+import kotlinx.android.synthetic.main.item_album.view.*
 import kotlinx.coroutines.*
 import ml.dcxo.x.obwei.AmbiColor
 import ml.dcxo.x.obwei.R
 import ml.dcxo.x.obwei.base.BaseAdapter
 import ml.dcxo.x.obwei.base.BaseViewHolder
-import ml.dcxo.x.obwei.utils.*
+import ml.dcxo.x.obwei.utils.generateAlphaGradient
 import ml.dcxo.x.obwei.viewModel.Album
 
 /**
@@ -21,7 +21,7 @@ import ml.dcxo.x.obwei.viewModel.Album
 class AlbumsAdapter: BaseAdapter<Album, AlbumsAdapter.AlbumViewHolder>() {
 
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AlbumViewHolder =
-		AlbumViewHolder( LayoutInflater.from(parent.context).inflate(R.layout.album_recycleritem, parent, false) )
+		AlbumViewHolder( LayoutInflater.from(parent.context).inflate(R.layout.item_album, parent, false) )
 
 	override fun areItemTheSame(oldItem: Album, newItem: Album): Boolean = oldItem.id == newItem.id
 	override fun areContentsTheSame(oldItem: Album, newItem: Album): Boolean = oldItem.trackList == newItem.trackList
@@ -44,7 +44,7 @@ class AlbumsAdapter: BaseAdapter<Album, AlbumsAdapter.AlbumViewHolder>() {
 					override fun onResourceReady(resource: Bitmap?, glideAnimation: GlideAnimation<in Bitmap>?) {
 
 						if (resource != null) j = GlobalScope.launch(Dispatchers.Main) {
-							val l = async { AmbiColor(resource, {}) }
+							val l = async { AmbiColor(resource) }
 							ambiColorCallback(l.await())
 						}
 

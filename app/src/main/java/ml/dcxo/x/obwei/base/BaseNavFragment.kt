@@ -7,8 +7,7 @@ import androidx.core.view.updatePadding
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.nav_fragment.*
-import kotlinx.android.synthetic.main.nav_fragment.view.*
+import kotlinx.android.synthetic.main.fragment_nav.view.*
 import ml.dcxo.x.obwei.R
 import ml.dcxo.x.obwei.utils.getStatusBarHeight
 import ml.dcxo.x.obwei.viewModel.Model
@@ -18,7 +17,7 @@ import ml.dcxo.x.obwei.viewModel.Model
  */
 abstract class BaseNavFragment<Item: Model, Adapter: BaseAdapter<Item, *>>: BaseFragment() {
 
-	override val layoutInflated: Int = R.layout.nav_fragment
+	override val layoutInflated: Int = R.layout.fragment_nav
 
 	open val decor: RecyclerView.ItemDecoration? = null
 	open val click: ((Item, Int)->Unit)? = null

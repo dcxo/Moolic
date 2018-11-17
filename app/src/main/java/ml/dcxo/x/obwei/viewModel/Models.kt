@@ -28,11 +28,12 @@ sealed class Model: Parcelable
 	}
 
 }
+typealias Tracklist = ArrayList<Song>
 
 @Parcelize data class Album(
 	var id: Int = 0, var title: String = "",
 	var artistId: Int = 0, var artistName: String = "",
-	var trackList: ArrayList<Song> = arrayListOf()
+	var trackList: Tracklist = arrayListOf()
 ): Model() {
 	@IgnoredOnParcel val getAlbumArtURI: String = ContentUris.withAppendedId(
 		Uri.parse("content://media/external/audio/albumart"),
@@ -41,9 +42,9 @@ sealed class Model: Parcelable
 
 @Parcelize data class Artist(
 	var id: Int = 0, var name: String = "",
-	var trackList: ArrayList<Song> = arrayListOf()
+	var trackList: Tracklist = arrayListOf()
 ): Model()
 
 @Parcelize data class Playlist(
-	var name: String = "", var trackList: ArrayList<Song> = arrayListOf()
+	var name: String = "", var trackList: Tracklist = arrayListOf()
 ): Model()

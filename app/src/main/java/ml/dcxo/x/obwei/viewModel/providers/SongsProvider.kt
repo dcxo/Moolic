@@ -3,7 +3,9 @@ package ml.dcxo.x.obwei.viewModel.providers
 import android.content.Context
 import android.database.Cursor
 import android.provider.MediaStore
+import ml.dcxo.x.obwei.utils.Settings
 import ml.dcxo.x.obwei.viewModel.Song
+import ml.dcxo.x.obwei.viewModel.Tracklist
 
 /**
  * Created by David on 30/10/2018 for ObweiX
@@ -27,10 +29,10 @@ object SongsProvider {
 
 	private fun getCursor(ctx: Context, sortOrder: String): Cursor? {
 		return ctx.contentResolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-			projection, selection, null, sortOrder)
+			projection, makeBlacklist(ctx), null, sortOrder)
 	}
 
-	fun getSongs(ctx: Context, sortOrder: String = order): ArrayList<Song> {
+	fun getSongs(ctx: Context, sortOrder: String = order): Tracklist {
 		val songs = arrayListOf<Song>()
 
 		getCursor(ctx, sortOrder)?.use {
@@ -58,6 +60,24 @@ object SongsProvider {
 		)
 
 	}
-	//TODO: Blacklist Support
+
+	private fun makeBlacklist(context: Context): String {
+
+		val bl = Settings.get(context).blacklist
+		val blMap = bl.groupBy { it.endsWith("%") }
+
+		return buildString {
+
+			append(selection)
+			if (bl.isEmpty()) return toString()
+
+			if (blMap[true] != null && blMap[true]?.isNotEmpty() == true)
+				append(" AND", " LIKE (${ blMap[true]?.joinToString(",") })")
+			if (blMap[false] != null && blMap[false]?.isNotEmpty() == true)
+				append(" AND", " IS (${ blMap[false]?.joinToString(",") })")
+
+		}
+
+	}
 
 }

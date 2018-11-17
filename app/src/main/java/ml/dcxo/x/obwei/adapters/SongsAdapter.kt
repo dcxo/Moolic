@@ -1,14 +1,12 @@
 package ml.dcxo.x.obwei.adapters
 
 import android.view.*
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.Target
-import kotlinx.android.synthetic.main.song_recycleritem.view.*
+import kotlinx.android.synthetic.main.item_song.view.*
 import ml.dcxo.x.obwei.R
 import ml.dcxo.x.obwei.base.BaseAdapter
 import ml.dcxo.x.obwei.base.BaseViewHolder
-import ml.dcxo.x.obwei.utils.TranscoderAmBitmap
 import ml.dcxo.x.obwei.viewModel.Song
 
 /**
@@ -17,7 +15,7 @@ import ml.dcxo.x.obwei.viewModel.Song
 class SongsAdapter: BaseAdapter<Song, SongsAdapter.SongViewHolder>() {
 
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SongViewHolder =
-		SongViewHolder( LayoutInflater.from(parent.context).inflate(R.layout.song_recycleritem, parent, false) )
+		SongViewHolder( LayoutInflater.from(parent.context).inflate(R.layout.item_song, parent, false) )
 	override fun areContentsTheSame(oldItem: Song, newItem: Song): Boolean =
 		oldItem.filePath == newItem.filePath
 	override fun areItemTheSame(oldItem: Song, newItem: Song): Boolean = oldItem.id == newItem.id

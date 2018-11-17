@@ -5,7 +5,7 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.*
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import kotlinx.android.synthetic.main.bottomsheet_dialog.view.*
+import kotlinx.android.synthetic.main.bottomdialog.view.*
 import ml.dcxo.x.obwei.R
 import ml.dcxo.x.obwei.service.UIInteractions
 import ml.dcxo.x.obwei.viewModel.Song
@@ -21,7 +21,7 @@ class SongBottomDialog: BottomSheetDialogFragment() {
 	override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
 		dialog.window?.setBackgroundDrawable( ColorDrawable(Color.RED) )
-		val v = inflater.inflate(R.layout.bottomsheet_dialog, container, false)
+		val v = inflater.inflate(R.layout.bottomdialog, container, false)
 
 		v.addToQueueOption.setOnClickListener {
 			uiInteractions.onAddToQueue(song)

@@ -1,14 +1,13 @@
 package ml.dcxo.x.obwei.viewModel.providers
 
-import ml.dcxo.x.obwei.viewModel.Album
-import ml.dcxo.x.obwei.viewModel.Song
+import ml.dcxo.x.obwei.viewModel.*
 
 /**
  * Created by David on 30/10/2018 for ObweiX
  */
 object AlbumsProvider {
 
-	fun getAlbums(songs: ArrayList<Song>): ArrayList<Album> {
+	fun getAlbums(songs: Tracklist): ArrayList<Album> {
 
 		val albums = arrayListOf<Album>()
 
