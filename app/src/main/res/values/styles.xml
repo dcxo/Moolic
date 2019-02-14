@@ -1,41 +1,63 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Base application theme. -->
-    <style name="Obwei" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+	<!-- Base application theme. -->
+	<style name="Obwei" parent="Theme.MaterialComponents.Light.NoActionBar">
+		<!-- Customize your theme here. -->
+		<item name="colorPrimary">@color/colorPrimary</item>
+		<item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+		<item name="colorAccent">@color/colorAccent</item>
 
-        <item name="android:textAppearance">@style/TextAppearance.Obwei</item>
-        <item name="android:ellipsize">end</item>
-        <item name="android:maxLines">1</item>
+		<item name="android:textAppearance">@style/TextAppearance.Obwei</item>
+		<item name="android:fontFamily">@font/oxygen</item>
+		<item name="android:ellipsize">end</item>
+		<item name="android:maxLines">1</item>
+		<item name="android:scrollHorizontally">true</item>
 
-        <item name="android:windowTranslucentStatus" tools:ignore="NewApi">true</item>
+		<item name="toolbarStyle">@style/Obwei.Toolbar</item>
+		<!--<item name="bottomNavigationStyle">@style/Obwei.BottomNav</item>-->
 
-    </style>
+		<item name="textInputStyle">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox</item>
+		<item name="editTextStyle">@style/Widget.MaterialComponents.TextInputEditText.OutlinedBox</item>
 
-    <style name="TextAppearance.Obwei" parent="TextAppearance.MaterialComponents.Body1" >
-        <item name="fontFamily">@font/oxygen</item>
+		<item name="alertDialogTheme">@style/ThemeOverlay.MaterialComponents.Dialog.Alert</item>
+
+		<item name="android:overScrollMode">never</item>
+
+		<item name="android:windowTranslucentStatus" tools:ignore="NewApi">true</item>
+		<item name="android:windowLightStatusBar" tools:ignore="NewApi">true</item>
+
+	</style>
+
+	<style name="TextAppearance.Obwei" parent="TextAppearance.MaterialComponents.Body1" >
+		<item name="fontFamily">@font/oxygen</item>
 		<item name="android:textAlignment">center</item>
-    </style>
+	</style>
 
-    <style name="TextAppearance.Obwei.Headline1" parent="TextAppearance.MaterialComponents.Headline1">
+	<style name="TextAppearance.Obwei.Headline1" parent="TextAppearance.MaterialComponents.Headline1">
 		<item name="fontFamily">@font/oxygen_bold</item>
-        <item name="android:textSize">32sp</item>
-    </style>
-    <style name="TextAppearance.Obwei.Headline2" parent="TextAppearance.MaterialComponents.Headline2">
+		<item name="android:textSize">32sp</item>
+	</style>
+	<style name="TextAppearance.Obwei.Headline2" parent="TextAppearance.MaterialComponents.Headline2">
 		<item name="fontFamily">@font/oxygen_bold</item>
-        <item name="android:textSize">24sp</item>
-    </style>
-    <style name="TextAppearance.Obwei.Headline3" parent="TextAppearance.MaterialComponents.Headline3">
-        <item name="android:textSize">16sp</item>
-    </style>
+		<item name="android:textSize">24sp</item>
+	</style>
+	<style name="TextAppearance.Obwei.Headline3" parent="TextAppearance.MaterialComponents.Headline3">
+		<item name="android:textSize">16sp</item>
+	</style>
 	<style name="TextAppearance.Obwei.Option" parent="TextAppearance.Obwei.Headline2">
-		<item name="fontFamily">@font/oxygen_bold</item>
 		<item name="android:textAlignment">center</item>
 		<item name="android:padding">4dp</item>
 		<item name="android:textSize">20sp</item>
+	</style>
+
+	<style name="Obwei.Toolbar" parent="Widget.MaterialComponents.Toolbar">
+		<item name="titleTextColor">#9E000000</item>
+	</style>
+
+	<style name="Obwei.BottomNav" parent="Widget.MaterialComponents.BottomNavigationView.Colored">
+		<item name="itemIconTint">@color/selector_items_bottom_nav</item>
+		<item name="itemTextColor">@color/selector_items_bottom_nav</item>
+		<item name="itemBackground">@color/colorPrimary</item>
 	</style>
 
 </resources>

@@ -5,16 +5,20 @@ import android.view.*
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import kotlinx.coroutines.*
+import ml.dcxo.x.obwei.service.UIInteractions
 import ml.dcxo.x.obwei.ui.UniqueActivity
 import kotlin.coroutines.CoroutineContext
 
 /**
- * Created by David on 02/11/2018 for ObweiX
+ * Created by David on 02/11/2018 for XOXO
  */
 abstract class BaseFragment: Fragment(), CoroutineScope {
 
+	val mActivity: UniqueActivity?; get() = (activity as? UniqueActivity)
+	val uiInteractions: UIInteractions?; get() = mActivity?.uiInteractions
+
 	private val job = Job()
-	val uiInteractions; get() = (activity as UniqueActivity).uiInteractions
+
 	override val coroutineContext: CoroutineContext = Dispatchers.Main + job
 
 	@get:LayoutRes abstract val layoutInflated: Int

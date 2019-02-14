@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit
 
 
 /**
- * Created by David on 17/11/2018 for ObweiX
+ * Created by David on 17/11/2018 for XOXO
  */
 fun millisToString(millis: Long): String {
 

@@ -5,6 +5,7 @@
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 	<uses-permission android:name="android.permission.WAKE_LOCK"/>
+	<uses-permission android:name="android.permission.INTERNET"/>
 
 	<application
 		android:name=".Obwei"
@@ -13,26 +14,42 @@
 		android:label="@string/appName"
 		android:roundIcon="@mipmap/ic_launcher_round"
 		android:supportsRtl="true"
+		android:resizeableActivity="false"
 		android:theme="@style/Obwei">
 
-		<activity android:name=".ui.UniqueActivity">
+		<activity
+			android:name=".ui.UniqueActivity"
+			android:windowSoftInputMode="adjustPan"
+			android:screenOrientation="portrait"
+			android:resizeableActivity="false"
+			android:launchMode="singleTop">
+
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
-
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
+
+			<intent-filter>
+				<action android:name="android.intent.action.VIEW"/>
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.APP_MUSIC"/>
+
+				<data
+					android:scheme="file"
+					android:mimeType="audio/*"/>
+
+			</intent-filter>
+
 		</activity>
 
 		<meta-data
 			android:name="preloaded_fonts"
 			android:resource="@array/preloaded_fonts" />
 
-		<service android:name=".service.MusicService">
-
+		<service android:name=".service.MusicService" android:exported="false">
 			<intent-filter>
-				<action android:name="android.media.AUDIO_BECOMING_NOISY"></action>
+				<action android:name="android.intent.action.MEDIA_BUTTON"/>
 			</intent-filter>
-
 		</service>
 
 	</application>

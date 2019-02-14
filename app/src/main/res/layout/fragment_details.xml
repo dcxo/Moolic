@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="#fff">
+
+	<View
+		android:id="@+id/bgHolder"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		app:layout_constraintLeft_toLeftOf="@id/detailsRv"
+		app:layout_constraintRight_toRightOf="@id/detailsRv"
+		app:layout_constraintTop_toTopOf="@id/albumTitle"
+		app:layout_constraintBottom_toBottomOf="@id/detailsRv"
+		tools:background="#fff"/>
+
+	<com.google.android.material.card.MaterialCardView
+		android:id="@+id/cardViewHelper"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:translationZ="-9dp"
+		app:cardElevation="8dp"
+		app:cardCornerRadius="4dp"
+		app:layout_constraintVertical_bias="0"
+		app:layout_constraintWidth_percent="0.5"
+		app:layout_constraintDimensionRatio="1"
+		app:layout_constraintTop_toTopOf="parent"
+		app:layout_constraintBottom_toBottomOf="parent"
+		app:layout_constraintLeft_toLeftOf="parent"
+		app:layout_constraintRight_toRightOf="parent">
+
+		<ImageView
+			android:id="@+id/albumArt"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent" />
+
+	</com.google.android.material.card.MaterialCardView>
+
+	<TextView
+		android:id="@+id/albumTitle"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="8dp"
+		android:gravity="center"
+		android:padding="8dp"
+		android:textAppearance="@style/TextAppearance.Obwei.Headline1"
+		app:layout_constraintBottom_toTopOf="@id/detailsRv"
+		app:layout_constraintLeft_toLeftOf="@id/detailsRv"
+		app:layout_constraintRight_toRightOf="@id/detailsRv"
+		app:layout_constraintTop_toBottomOf="@+id/cardViewHelper"
+		tools:text="AlbumTitleAlbumTitle" />
+
+	<androidx.recyclerview.widget.RecyclerView
+		android:id="@+id/detailsRv"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:clipToPadding="false"
+		android:paddingTop="8dp"
+		android:paddingRight="8dp"
+		android:paddingLeft="8dp"
+		app:layout_constraintWidth_percent="0.9"
+		app:layout_constraintTop_toBottomOf="@id/albumTitle"
+		app:layout_constraintLeft_toLeftOf="parent"
+		app:layout_constraintRight_toRightOf="parent"
+		app:layout_constraintBottom_toBottomOf="parent"/>
+
+	<ImageView
+		android:id="@+id/backButton"
+		android:layout_width="?actionBarSize"
+		android:layout_height="?actionBarSize"
+		android:padding="8dp"
+		android:tintMode="src_in"
+		android:tint="#fff"
+		app:layout_constraintTop_toTopOf="parent"
+		app:layout_constraintLeft_toLeftOf="parent"
+		app:srcCompat="@drawable/icon_back"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

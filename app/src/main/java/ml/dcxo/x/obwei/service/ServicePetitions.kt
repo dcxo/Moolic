@@ -1,11 +1,11 @@
 package ml.dcxo.x.obwei.service
 
 /**
- * Created by David on 08/11/2018 for ObweiX
+ * Created by David on 08/11/2018 for XOXO
  */
 interface ServicePetitions {
 
 	fun openPlayer()
-	fun closePlayer()
+	fun closePlayer(destroy: Boolean = false): Boolean
 
 }

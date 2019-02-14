@@ -8,11 +8,13 @@ import java.lang.Math.abs
 import java.lang.Math.min
 
 /**
- * Created by David on 02/11/2018 for ObweiX
+ * Created by David on 02/11/2018 for XOXO
  */
 class AmbiColor() {
 
-	constructor(bitmap: Bitmap) : this() {
+	constructor(bitmap: Bitmap?) : this() {
+
+		if (bitmap == null) return
 
 		val palette = Palette.from(bitmap).generate()
 

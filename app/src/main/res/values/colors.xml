@@ -1,10 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
-    <color name="colorAccent">#D81B60</color>
+	<color name="colorPrimary">@color/yellow_500</color>
+	<color name="colorPrimaryDark">@color/yellow_900</color>
+	<color name="colorAccent">@color/pink_700</color>
+	<color name="alphaColorAccent">#80F35791</color>
 
-	<color name="colorWarn">#c7ba40</color>
-	<color name="colorDanger">#d24444</color>
+	<color name="colorWarn">@color/yellow_900</color>
+	<color name="colorDanger">@color/pink_900</color>
+
+	<color name="yellow_50">#fef9ea</color>
+	<color name="yellow_100">#fcefca</color>
+	<color name="yellow_200">#fae5a6</color>
+	<color name="yellow_300">#f8db82</color>
+	<color name="yellow_400">#f7d368</color>
+	<color name="yellow_500">#f5cb4d</color>
+	<color name="yellow_600">#f4c646</color>
+	<color name="yellow_700">#f2be3d</color>
+	<color name="yellow_800">#f0b834</color>
+	<color name="yellow_900">#eeac25</color>
+
+	<color name="pink_50">#feedf4</color>
+	<color name="pink_100">#fcd2e3</color>
+	<color name="pink_200">#fbb5d1</color>
+	<color name="pink_300">#f997bf</color>
+	<color name="pink_400">#f780b1</color>
+	<color name="pink_500">#f66aa3</color>
+	<color name="pink_600">#f5629b</color>
+	<color name="pink_700">#f35791</color>
+	<color name="pink_800">#f24d88</color>
+	<color name="pink_900">#ef3c77</color>
+
+	<color name="blue_50">#e6f0fb</color>
+	<color name="blue_100">#c1daf6</color>
+	<color name="blue_200">#97c1f0</color>
+	<color name="blue_300">#6da8e9</color>
+	<color name="blue_400">#4e96e5</color>
+	<color name="blue_500">#2f83e0</color>
+	<color name="blue_600">#2a7bdc</color>
+	<color name="blue_700">#2370d8</color>
+	<color name="blue_800">#1d66d3</color>
+	<color name="blue_900">#1253cb</color>
+
+	<color name="light_gray">#a7a7a7</color>
 
 </resources>

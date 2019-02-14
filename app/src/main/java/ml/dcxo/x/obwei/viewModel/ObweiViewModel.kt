@@ -1,11 +1,15 @@
 package ml.dcxo.x.obwei.viewModel
 
 import android.app.Application
+import android.database.ContentObserver
+import android.os.Handler
+import android.provider.MediaStore
 import androidx.lifecycle.*
+import ml.dcxo.x.obwei.Obwei
 import ml.dcxo.x.obwei.viewModel.providers.*
 
 /**
- * Created by David on 25/10/2018 for ObweiX
+ * Created by David on 25/10/2018 for XOXO
  */
 class ObweiViewModel(app: Application): AndroidViewModel(app) {
 
@@ -14,10 +18,18 @@ class ObweiViewModel(app: Application): AndroidViewModel(app) {
 	private var artists: MutableLiveData<ArrayList<Artist>> = MutableLiveData()
 	private var playlists: MutableLiveData<ArrayList<Playlist>> = MutableLiveData()
 
+	private val contentObserver = MusicContentObserver( Handler() )
+
 	init {
+		loadEverything()
+		app.contentResolver.registerContentObserver(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, true, contentObserver)
+	}
+
+	fun loadEverything() {
 		getSongs(true)
 		getAlbums(true)
 		getArtist(true)
+		getPlaylist(true)
 	}
 
 	fun getSongs(forced: Boolean = false): LiveData<Tracklist> {
@@ -31,7 +43,7 @@ class ObweiViewModel(app: Application): AndroidViewModel(app) {
 	fun getAlbums(forced: Boolean = false): LiveData<ArrayList<Album>> {
 
 		if (albums.value.isNullOrEmpty() || forced)
-			albums.postValue( AlbumsProvider.getAlbums(songs.value ?: arrayListOf()) )
+			albums.postValue( AlbumsProvider.getAlbums(getApplication()) )
 
 		return albums
 
@@ -39,13 +51,37 @@ class ObweiViewModel(app: Application): AndroidViewModel(app) {
 	fun getArtist(forced: Boolean = false): LiveData<ArrayList<Artist>> {
 
 		if (artists.value.isNullOrEmpty() || forced)
-			artists.postValue( ArtistsProvider.getArtists(songs.value ?: arrayListOf()) )
+			artists.postValue( ArtistsProvider.getArtists(getApplication()) )
 
 		return artists
 
 	}
-	//TODO: GET PLAYLIST
+	fun getPlaylist(forced: Boolean = false): LiveData<ArrayList<Playlist>> {
 
-	// TODO: Create Content Observer
+		if (playlists.value.isNullOrEmpty() || forced)
+			playlists.postValue( PlaylistsProvider.getPlaylists(getApplication()) )
+
+		return playlists
+
+	}
+
+	override fun onCleared() {
+		super.onCleared()
+		getApplication<Obwei>().contentResolver.unregisterContentObserver(contentObserver)
+	}
+
+	inner class MusicContentObserver(var handler: Handler) : ContentObserver(handler) {
+
+		var runnable = Runnable { loadEverything() }
+
+		override fun onChange(selfChange: Boolean) {
+			super.onChange(selfChange)
+			handler.removeCallbacks(runnable)
+			handler.post(runnable)
+		}
+
+		override fun deliverSelfNotifications(): Boolean = true
+
+	}
 
 }

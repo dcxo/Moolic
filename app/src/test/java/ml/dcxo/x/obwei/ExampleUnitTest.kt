@@ -1,11 +1,7 @@
 package ml.dcxo.x.obwei
 
+import org.junit.Assert.assertEquals
 import org.junit.Test
-
-import org.junit.Assert.*
-import java.util.*
-import java.util.logging.Logger
-import kotlin.system.measureTimeMillis
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -22,11 +18,7 @@ class ExampleUnitTest {
 	@Test
 	fun orderTiming() {
 
-		val a = ('a'..'z').toMutableList()
-		a.shuffle()
 
-		val l = measureTimeMillis { a.sorted() }
-		System.out.print(l)
 
 	}
 

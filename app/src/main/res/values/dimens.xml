@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+	<dimen name="miniPlayerHeight">35dp</dimen>
+	<dimen name="mediumCardRadii">8dp</dimen>
+	<dimen name="headerNavSize">96dp</dimen>
+	<dimen name="minUnit">8dp</dimen>
+
+</resources>

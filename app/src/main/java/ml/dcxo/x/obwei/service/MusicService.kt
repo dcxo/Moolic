@@ -1,11 +1,10 @@
 package ml.dcxo.x.obwei.service
 
+import android.app.PendingIntent
 import android.app.Service
 import android.content.*
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
-import android.graphics.drawable.Drawable
 import android.media.*
 import android.os.*
 import android.os.Build.VERSION.SDK_INT
@@ -19,11 +18,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.media.session.MediaButtonReceiver
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.animation.GlideAnimation
-import com.bumptech.glide.request.target.SimpleTarget
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import kotlinx.coroutines.*
 import ml.dcxo.x.obwei.AmbiColor
-import ml.dcxo.x.obwei.utils.*
+import ml.dcxo.x.obwei.utils.Settings
+import ml.dcxo.x.obwei.utils.mediaSessionKey
 import ml.dcxo.x.obwei.viewModel.Song
 import ml.dcxo.x.obwei.viewModel.Tracklist
 import java.io.*
@@ -32,17 +34,20 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.properties.Delegates
 
 /**
- * Created by David on 03/11/2018 for ObweiX
+ * Created by David on 03/11/2018 for XOXO
  */
 class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 
 	lateinit var mSession: MediaSessionCompat
-	lateinit var audioManager: AudioManager
+	private lateinit var audioManager: AudioManager
+	private lateinit var notification: MusicNotification
 
 	override val coroutineContext: CoroutineContext = Dispatchers.Default
+	override val player: MediaPlayer = MediaPlayer()
 	/* Service state vars */
 	val liveServiceState = MutableLiveData<ServiceState>()
 	var cSong by Delegates.observable(Song.NULL) {_, _, newSong ->
+		if (this::notification.isInitialized) notification.update()
 		liveServiceState.postValue( ServiceState(song = newSong) )
 	}
 	var cAmbiColor by Delegates.observable(AmbiColor.NULL) {_, _, newAmbiColor ->
@@ -72,13 +77,15 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 
 		liveQueue.postValue(queue)
 		liveServiceState.postValue( ServiceState(shuffleMode = newShuffleMode) )
-		Settings.get(this).shuffleMode = newShuffleMode
+		Settings[this].shuffleMode = newShuffleMode
 	}
 	var cRepeatMode by Delegates.observable( PlaybackStateCompat.REPEAT_MODE_NONE ) { _, _, newRepeatMode ->
 		liveServiceState.postValue( ServiceState(repeatMode = newRepeatMode) )
-		Settings.get(this).repeatMode = newRepeatMode
+		Settings[this].repeatMode = newRepeatMode
 	}
 	var cPlaybackStateCompat: PlaybackStateCompat by Delegates.observable( PlaybackStateCompat.Builder().build() ) { _, _, newPlaybackState ->
+		mSession.setPlaybackState(newPlaybackState)
+		if (this::notification.isInitialized) notification.update()
 		liveServiceState.postValue( ServiceState(playbackState = newPlaybackState) )
 	}
 	/* Queue vars */
@@ -91,6 +98,7 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 	val livePlayerProgress = MutableLiveData<Int>()
 
 	private var servicePetitions: ServicePetitions? = null
+	private var isPausedFromAudioFocusChanges = false
 	private val mBinder = MusicServiceBinder()
 	private val preparedListener = MediaPlayer.OnPreparedListener {
 
@@ -108,7 +116,7 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 	private val callback = object : MediaSessionCompat.Callback(){
 		override fun onPlay() = player.play()
 		override fun onPause() = player.obweiPause()
-		override fun onSkipToPrevious() = player.skipToPrevious()
+		override fun onSkipToPrevious() = player.skipToPrevious(true)
 		override fun onSkipToNext() = player.skipToNext(true)
 	}
 	private val pauseJob = launch(start = CoroutineStart.LAZY) {
@@ -118,6 +126,11 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 
 	}
 	private val handler = Handler()
+	private val mActions = {
+		PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PLAY_PAUSE or
+				PlaybackStateCompat.ACTION_PAUSE or PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+				PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+	}()
 	private val progressJob = object: Runnable {
 		override fun run() {
 			livePlayerProgress.postValue( player.currentPosition )
@@ -130,10 +143,16 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 		when (it) {
 
 			AudioManager.AUDIOFOCUS_GAIN, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT -> {
-				player.play()
+				if (isPausedFromAudioFocusChanges) {
+					player.play()
+					isPausedFromAudioFocusChanges = false
+				}
 				player.setVolume(1f, 1f)
 			}
-			AudioManager.AUDIOFOCUS_LOSS, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> player.obweiPause()
+			AudioManager.AUDIOFOCUS_LOSS, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+				isPausedFromAudioFocusChanges = player.isPlaying
+				player.obweiPause()
+			}
 			AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> player.setVolume(0.15f, 0.15f)
 
 		}
@@ -151,7 +170,6 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 			.build()
 	else null
 
-	override val player: MediaPlayer = MediaPlayer()
 
 	private fun fetchMetadataAndAmbiColor() = launch {
 
@@ -184,28 +202,21 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 
 	}
 	private fun setAmbiColor() {
-		if (ambiColorCache.get(cSong.albumId) == null) {
-			val target = object : SimpleTarget<AmbiBitmap>() {
-				override fun onResourceReady(resource: AmbiBitmap?, glideAnimation: GlideAnimation<in AmbiBitmap>?) {
 
-					cAmbiColor = resource?.ambiColor ?: AmbiColor.NULL
-					ambiColorCache.put(cSong.albumId, cAmbiColor)
-
-				}
-
-				override fun onLoadFailed(e: java.lang.Exception?, errorDrawable: Drawable?) {
-					super.onLoadFailed(e, errorDrawable)
-
+		Glide.with(this).asBitmap().load(cSong.getAlbumArtURI)
+			.listener(object: RequestListener<Bitmap> {
+				override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Bitmap>?, isFirstResource: Boolean): Boolean {
 					cAmbiColor = AmbiColor.NULL
-
+					return false
 				}
-			}
-			Glide.with(this).load(cSong.getAlbumArtURI).asBitmap()
-				.transcode(TranscoderAmBitmap(applicationContext), AmbiBitmap::class.java)
-				.error(ColorDrawable(Color.RED)).override(155.dp, 155.dp).into(target)
-		} else {
-			cAmbiColor = ambiColorCache.get(cSong.albumId)!!
-		}
+
+				override fun onResourceReady(resource: Bitmap?, model: Any?, target: Target<Bitmap>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+					cAmbiColor = ambiColorCache[cSong.albumId] ?: AmbiColor(resource)
+					return true
+				}
+
+			}).preload()
+
 	}
 	private fun getAudioFocus(): Int {
 
@@ -215,19 +226,20 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 			audioManager.requestAudioFocus(audioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
 
 	}
-	private fun changePlaybackState(newState: Int) {
-
-		val progress = livePlayerProgress.value?.toLong() ?: PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN
-		val rate = if (newState == PlaybackStateCompat.STATE_PAUSED) 0f else 1f
-		val actions = PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE or
-				PlaybackStateCompat.ACTION_PLAY_PAUSE or PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
-				PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
-
-		cPlaybackStateCompat = PlaybackStateCompat.Builder()
-			.setActions(actions)
-			.setState(newState, progress, rate)
-			.build()
-
+	private fun playbackState(
+		@PlaybackStateCompat.State state: Int,
+		position: Long = PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN
+	): PlaybackStateCompat {
+		return PlaybackStateCompat.Builder()
+			.setState(state, position, 1f)
+			.setActions(mActions).build()
+	}
+	private fun playPause() {
+		when (cPlaybackStateCompat.state) {
+			PlaybackStateCompat.STATE_PLAYING -> player.obweiPause()
+			PlaybackStateCompat.STATE_PAUSED  -> player.play()
+			else                              -> throw IllegalStateException()
+		}
 	}
 
 	override fun onCreate() {
@@ -238,48 +250,89 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 
 		registerReceiver(noisy, IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY))
 
-		val componentName = ComponentName(this, MediaButtonReceiver::class.java)
-
-		cShuffleMode = Settings.get(this).shuffleMode
-		cRepeatMode = Settings.get(this).repeatMode
+		cShuffleMode = Settings[this].shuffleMode
+		cRepeatMode = Settings[this].repeatMode
 
 		audioManager = getSystemService<AudioManager>() ?: throw IllegalStateException()
 
-		mSession = MediaSessionCompat(this, mediaSessionKey, componentName, null)
+		val componentName = ComponentName(this, MediaButtonReceiver::class.java)
+		val intent = Intent(Intent.ACTION_MEDIA_BUTTON).apply { component = componentName }
+		val pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
+
+		mSession = MediaSessionCompat(this, mediaSessionKey, componentName, pendingIntent)
 		mSession.setCallback(callback)
+		mSession.setFlags( MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS or MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS )
+		mSession.setMediaButtonReceiver(pendingIntent)
+		mSession.setMetadata(null)
+		cPlaybackStateCompat = playbackState(PlaybackStateCompat.STATE_NONE)
+
+		notification = MusicNotification()
+		notification.init(this)
+
 		mSession.isActive = true
 
-		changePlaybackState( PlaybackStateCompat.STATE_NONE )
+	}
+	override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
+		val what = intent?.action
+
+		when (what) {
+			PLAY -> playPause()
+			NEXT -> player.skipToNext(true)
+			PREVIOUS -> player.skipToPrevious(true)
+			DELETE -> stopSelf()
+		}
+
+		return super.onStartCommand(intent, flags, startId)
+	}
+	override fun onBind(intent: Intent?): IBinder? = mBinder
+	override fun onUnbind(intent: Intent?): Boolean {
+		servicePetitions?.closePlayer(true)
+		servicePetitions = null
+		return super.onUnbind(intent)
 	}
 	override fun onDestroy() {
 
 		player.stop()
+		player.release()
+
+		if (SDK_INT >= Build.VERSION_CODES.O) audioManager.abandonAudioFocusRequest(audioFocusRequest)
+		else audioManager.abandonAudioFocus(audioFocusChangeListener)
+
 		mSession.setCallback(null)
 		mSession.isActive = false
+		mSession.release()
+
+		notification.stop()
+
+		servicePetitions?.closePlayer(true)
+
+		ambiColorCache.evictAll()
+
 		pauseJob.cancel()
 		handler.removeCallbacks(progressJob)
+
 		unregisterReceiver(noisy)
 
 	}
-	override fun onBind(intent: Intent?): IBinder? = mBinder
 
 	override fun onSongSelected(song: Song, sortedList: Tracklist, indexInList: Int) {
 
 		cSong = song
+		val sList = Tracklist(sortedList)
 
 		qSortedQueue.clear()
-		qSortedQueue.addAll(sortedList)
+		qSortedQueue.addAll(sList)
 
 		qQueue = if (cShuffleMode) {
-			sortedList.removeAt(indexInList)
-			sortedList.shuffle(Random(System.nanoTime()))
-			sortedList.add(0, song)
+			sList.removeAt(indexInList)
+			sList.shuffle(Random(System.nanoTime()))
+			sList.add(0, cSong)
 			cPosition = 0
-			sortedList
+			sList
 		} else {
 			cPosition = indexInList
-			sortedList
+			sList
 		}
 
 
@@ -287,16 +340,29 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 		servicePetitions?.openPlayer()
 
 	}
+	override fun onShuffleAllButtonClicked(sortedList: Tracklist) {
+
+		qSortedQueue.clear()
+		qSortedQueue.addAll(sortedList)
+
+		val l = Tracklist(sortedList)
+		l.shuffle(Random(System.currentTimeMillis()))
+		qQueue = l
+
+		cSong = l[0]
+		cPosition = 0
+
+		player.obweiPrepare()
+		servicePetitions?.openPlayer()
+
+	}
 	override fun onPlayPauseButtonClicked() {
 
-		when (cPlaybackStateCompat.state) {
-			PlaybackStateCompat.STATE_PLAYING -> player.obweiPause()
-			PlaybackStateCompat.STATE_PAUSED  -> player.play()
-			else -> throw IllegalStateException()
-		}
+		playPause()
 
 	}
 	override fun onShuffleButtonClicked() { cShuffleMode = !cShuffleMode }
+	override fun onShuffleToggle(boolean: Boolean) { cShuffleMode = boolean }
 	override fun onRepeatButtonClicked() {
 
 		cRepeatMode = when (cRepeatMode) {
@@ -312,36 +378,72 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 		cPosition = selectedIndex
 		val song = qQueue[cPosition]
 
-		if ( song.id != cSong.id ) {
-			cSong = song
-			player.obweiPrepare()
-		}
+		if ( song.id != cSong.id ) cSong = song
+		player.obweiPrepare()
 
 	}
-	override fun onAddToQueue(song: Song) {
+	override fun onAddToQueue(songs: Tracklist, allSongs: Tracklist, indexInList: Int) {
 
-		qQueue.add(cPosition+1, song)
-		liveQueue.postValue(qQueue)
-		// TODO( Complete AddToQueue() )
+		if (songs.size == 1) {
+			if (cPlaybackStateCompat.state == PlaybackStateCompat.STATE_NONE) onSongSelected(songs[0], allSongs, indexInList)
+			else qQueue = qQueue.apply { add(cPosition + 1, songs[0]) }
+		} else {
+			if (cPlaybackStateCompat.state == PlaybackStateCompat.STATE_NONE) onSongSelected(songs[0], songs, 0)
+			else qQueue = qQueue.apply {
+				songs.forEachIndexed { index, song ->  add(cPosition + index + 1, song) }
+			}
+		}
 
 	}
 	override fun onSeekBarProgressChange(int: Int) {
 		player.seekTo(int)
 	}
 
+	override fun onRemoveFromQueue(position: Int) {
+
+		if (position == cPosition) {
+			player.skipToNext(true)
+			cPosition--
+			if (cPosition == -1) cPosition = 0
+		}
+		try {
+			qQueue.removeAt(position)
+			qQueue = qQueue
+		} catch (e: IndexOutOfBoundsException) {}
+
+	}
+	override fun onRemoveQueue() {
+		player.reset()
+		cPosition = -1
+		cSong = Song.NULL
+		qQueue = arrayListOf()
+		cAmbiColor = AmbiColor.NULL
+		cPlaybackStateCompat = playbackState(PlaybackStateCompat.STATE_NONE)
+		notification.stop()
+		servicePetitions?.closePlayer(true)
+	}
+	override fun skipToNext() { player.skipToNext(true) }
+	override fun skipToPrevious() { player.skipToPrevious(true) }
+	override fun onQueueChange(newQueue: Tracklist) {
+		cPosition = newQueue.indexOf(cSong)
+		qQueue = newQueue
+	}
+
 	override fun MediaPlayer.play() {
 
-		handler.post(progressJob)
-		pauseJob.cancel()
-		start()
-		changePlaybackState( PlaybackStateCompat.STATE_PLAYING )
+		if (getAudioFocus() == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+			handler.post(progressJob)
+			pauseJob.cancel()
+			start()
+			cPlaybackStateCompat = playbackState(PlaybackStateCompat.STATE_PLAYING, player.currentPosition.toLong())
+		}
 
 	}
 	override fun MediaPlayer.obweiPause() {
 
 		launch { pauseJob.join() }
 		pause()
-		changePlaybackState( PlaybackStateCompat.STATE_PAUSED )
+		cPlaybackStateCompat = playbackState(PlaybackStateCompat.STATE_PAUSED, player.currentPosition.toLong())
 
 	}
 	override fun MediaPlayer.skipToNext(force: Boolean) {
@@ -357,25 +459,40 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 
 		}
 
+		try {
+			cPosition = tempPosition
+			cSong = qQueue[cPosition]
+			player.obweiPrepare()
+		} catch (e: IndexOutOfBoundsException) {}
+
+	}
+	override fun MediaPlayer.skipToPrevious(force: Boolean) {
+
+		var tempPosition = cPosition - 1
+		val size = qQueue.size
+
+		when (cRepeatMode) {
+
+			PlaybackStateCompat.REPEAT_MODE_NONE -> if (tempPosition == -1) stopSelf() // TODO(REMOVE STOPSELF())
+			PlaybackStateCompat.REPEAT_MODE_ALL  -> if (tempPosition == -1) tempPosition = size-1
+			PlaybackStateCompat.REPEAT_MODE_ONE  -> if (!force) tempPosition = cPosition
+
+		}
+
 		cPosition = tempPosition
 		cSong = qQueue[cPosition]
 		player.obweiPrepare()
-
-	}
-	override fun MediaPlayer.skipToPrevious() {
-
 	}
 	override fun MediaPlayer.obweiPrepare() {
 
+		if (cSong == Song.NULL) return
 		setAmbiColor()
 
 		reset()
 		try {
 			setDataSource(cSong.filePath)
 			prepareAsync()
-		} catch (e: IOException) {
-			skipToNext(true)
-		}
+		} catch (e: IOException) {}
 
 	}
 
@@ -383,6 +500,8 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 		fun setServicePetitions(servicePetitions: ServicePetitions) {
 			this@MusicService.servicePetitions = servicePetitions
 		}
+
+		fun getAudioSessionId(): Int = player.audioSessionId
 
 		val uiInteractions; get() = this@MusicService
 		val liveData: Triple<LiveData<ServiceState>, LiveData<Tracklist>, LiveData<Int>>
@@ -400,5 +519,14 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 		var repeatMode: Int = this@MusicService.cRepeatMode,
 		var playbackState: PlaybackStateCompat = this@MusicService.cPlaybackStateCompat
 	)
+
+	companion object {
+
+		const val PLAY = "X_PLAY_X"
+		const val PREVIOUS = "X_PREVIOUS_X"
+		const val NEXT = "X_NEXT_X"
+		const val DELETE = "X_DELETE_X"
+
+	}
 
 }

@@ -1,17 +1,60 @@
 <resources>
-	<string name="appName">ObweiX</string>
+	<string name="appName" translatable="false">Mukolor</string>
 
 	<string name="songs">Songs</string>
 	<string name="home">Home</string>
 	<string name="albums">Albums</string>
 	<string name="artists">Artists</string>
 
-	<string name="addToQueue">Add to queue</string>
-	<string name="addToPlaylist">Add to playlist</string>
-	<string name="goToAlbum">Go to album</string>
-	<string name="goToArtist">Go to artist</string>
-	<string name="editMetadata">Edit metadata</string>
-	<string name="addToBlacklist">Add to blacklist</string>
-	<string name="removeFromDisk">Remove from disk</string>
+	<string name="addToQueue">Add to Queue</string>
+	<string name="addToPlaylist">Add to Playlist</string>
+	<string name="goToAlbum">Go to Album</string>
+	<string name="goToArtist">Go to Artist</string>
+	<string name="editMetadata">Edit Metadata</string>
+	<string name="addToBlacklist">Add to Blacklist</string>
+	<string name="removeFromDisk">Remove from Disk</string>
+
+	<plurals name="addedToQueue">
+		<item quantity="one">Song added to queue</item>
+		<item quantity="two">2 songs added to queue</item>
+		<item quantity="few">Songs added to queue</item>
+		<item quantity="many">Songs added to queue</item>
+	</plurals>
+
+	<string name="remove_from_disk">Remove from Disk?</string>
+	<string name="add_to_blacklist">Add To Blacklist?</string>
+	<string name="new_playlist">New Playlist…</string>
+	<string name="create_playlist">Create Playlist</string>
+	<string name="edit_blacklist">Edit Blacklist</string>
+	<string name="sure_to_remove_to_blacklist">Remove from Blacklist?</string>
+	<string name="recently_added">Recently Added</string>
+	<string name="queue">Queue</string>
+
+	<string name="song_title">Song Title</string>
+	<string name="album_title">Album Title</string>
+	<string name="artist_name">Artist Name</string>
+	<string name="year">Year</string>
+	<string name="track_number">Track Number</string>
+	<string name="trackHelper">Ex: 3004 for CD3, track 4</string>
+	<string name="not_implemented">Not implemented yet</string>
+	<string name="accept">Accept</string>
+	<string name="cancel">Cancel</string>
+	<string name="delete_queue">Delete Queue</string>
+	<string name="eq">EQ</string>
+	<string name="save_queue">Save queue</string>
+	<string name="share">Share</string>
+	<string name="yes">Yes</string>
+	<string name="no">No</string>
+	<string name="add">Add</string>
+	<string name="search">Search</string>
+	<string name="shuffle_all" translatable="false">Shuffle All</string>
+	<string name="slide">Slide</string>
+	<string name="permissions_msg">Clikc here to accept the permissions. We need storage permissions only to access music</string>
+
+	<string-array name="album_art_sources">
+		<item>Download from Last.FM</item>
+		<item>Pick from local storage</item>
+		<item>Remove cover</item>
+	</string-array>
 
 </resources>
