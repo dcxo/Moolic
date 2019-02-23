@@ -18,11 +18,13 @@ class ArtistsNavFragment: BaseNavFragment<Artist, ArtistsAdapter>() {
 
 	override val decor: RecyclerView.ItemDecoration? = MarginDecor()
 
-	override val click: ((Artist, Int) -> Unit)? = {_, i ->
+	override val click: ((Artist, Int) -> Unit)? = {artist, i ->
 		mActivity?.hideKeyboard()
 
 		val l = Transformations.switchMap(getLiveData()) {
-			return@switchMap MutableLiveData<Artist>().apply { value = it[i] }
+			return@switchMap MutableLiveData<Artist>().apply {
+				value = it.firstOrNull { artist1 -> artist1.id == artist.id }
+			}
 		}
 		mActivity?.showArtist(l)
 	}

@@ -11,6 +11,7 @@ import ml.dcxo.x.obwei.adapters.PlaylistsAdapter
 import ml.dcxo.x.obwei.base.BaseFragment
 import ml.dcxo.x.obwei.ui.UniqueActivity
 import ml.dcxo.x.obwei.ui.dialogs.EditBlacklistDialog
+import ml.dcxo.x.obwei.ui.dialogs.bottomDialogs.PlaylistBottomDialog
 import ml.dcxo.x.obwei.ui.dialogs.createPlaylistDialog
 import ml.dcxo.x.obwei.ui.fragments.PlaylistTracksFragment
 import ml.dcxo.x.obwei.utils.*
@@ -55,6 +56,15 @@ class HomeNavFragment: BaseFragment() {
 					)
 					?.replace(R.id.detailsHost, f, detailsFragmentTag)
 					?.commit()
+			}
+			longClick = {playlist, i ->
+				fragmentManager?.let {
+					PlaylistBottomDialog().apply {
+						item = playlist
+						listPos = i
+						uiInteractions = this@HomeNavFragment.uiInteractions
+					}.show(it, albumTrackBottomDialogFragmentTag)
+				}
 			}
 		}
 

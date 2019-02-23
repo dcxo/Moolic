@@ -8,7 +8,6 @@
 		<item name="colorAccent">@color/colorAccent</item>
 
 		<item name="android:textAppearance">@style/TextAppearance.Obwei</item>
-		<item name="android:fontFamily">@font/oxygen</item>
 		<item name="android:ellipsize">end</item>
 		<item name="android:maxLines">1</item>
 		<item name="android:scrollHorizontally">true</item>
@@ -32,9 +31,8 @@
 		<item name="fontFamily">@font/oxygen</item>
 		<item name="android:textAlignment">center</item>
 	</style>
-
 	<style name="TextAppearance.Obwei.Headline1" parent="TextAppearance.MaterialComponents.Headline1">
-		<item name="fontFamily">@font/oxygen_bold</item>
+		<item name="android:fontFamily">@font/oxygen_bold</item>
 		<item name="android:textSize">32sp</item>
 	</style>
 	<style name="TextAppearance.Obwei.Headline2" parent="TextAppearance.MaterialComponents.Headline2">
@@ -46,18 +44,25 @@
 	</style>
 	<style name="TextAppearance.Obwei.Option" parent="TextAppearance.Obwei.Headline2">
 		<item name="android:textAlignment">center</item>
-		<item name="android:padding">4dp</item>
 		<item name="android:textSize">20sp</item>
+	</style>
+
+	<style name="Obwei.Option">
+		<item name="android:gravity">center</item>
+		<item name="android:padding">4dp</item>
+		<item name="android:textAppearance">@style/TextAppearance.Obwei.Option</item>
 	</style>
 
 	<style name="Obwei.Toolbar" parent="Widget.MaterialComponents.Toolbar">
 		<item name="titleTextColor">#9E000000</item>
 	</style>
-
 	<style name="Obwei.BottomNav" parent="Widget.MaterialComponents.BottomNavigationView.Colored">
 		<item name="itemIconTint">@color/selector_items_bottom_nav</item>
 		<item name="itemTextColor">@color/selector_items_bottom_nav</item>
 		<item name="itemBackground">@color/colorPrimary</item>
+	</style>
+	<style name="Obwei.EditText" parent="Widget.MaterialComponents.TextInputEditText.OutlinedBox">
+		<item name="android:inputType">textCapWords</item>
 	</style>
 
 </resources>

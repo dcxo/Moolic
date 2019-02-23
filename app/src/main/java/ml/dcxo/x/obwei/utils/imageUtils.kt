@@ -10,8 +10,6 @@ import androidx.annotation.ColorInt
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.toColorInt
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.annotation.GlideModule
-import com.bumptech.glide.module.AppGlideModule
 import ml.dcxo.x.obwei.AmbiColor
 
 /**
@@ -27,7 +25,7 @@ val statusBarSize: Int; get() {
 val Int.dp; get() = this * Resources.getSystem().displayMetrics.density.toInt()
 
 class MarginDecor(
-	private var dx: Int = statusBarSize/2,
+	private var dx: Int = 12.dp,
 	private var dy: Int = dx
 ): RecyclerView.ItemDecoration() {
 	override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State) {
@@ -93,6 +91,4 @@ fun makeThumbDrawableForSeekBar(@ColorInt c: Int, radius: Float = 5.dp.toFloat()
 		}
 
 	})
-
-@GlideModule class ObweiAppGlideModule: AppGlideModule()
 

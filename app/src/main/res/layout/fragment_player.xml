@@ -110,7 +110,7 @@
 		app:layout_constraintWidth_percent="0.7"
 		tools:background="@color/blue_500"/>
 
-	<androidx.viewpager.widget.ViewPager
+	<androidx.viewpager2.widget.ViewPager2
 		android:id="@+id/viewPager"
 		android:layout_width="0dp"
 		android:layout_height="0dp"

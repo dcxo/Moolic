@@ -15,17 +15,17 @@ import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.forEach
 import androidx.core.view.updatePadding
-import androidx.fragment.app.*
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.*
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
-import androidx.viewpager.widget.ViewPager
+import androidx.viewpager2.widget.ViewPager2
 import kotlinx.android.synthetic.main.fragment_player.*
 import kotlinx.android.synthetic.main.fragment_player.view.*
 import ml.dcxo.x.obwei.AmbiColor
 import ml.dcxo.x.obwei.R
+import ml.dcxo.x.obwei.adapters.AlbumArtsAdapter
 import ml.dcxo.x.obwei.adapters.QueueAdapter
 import ml.dcxo.x.obwei.base.BaseFragment
 import ml.dcxo.x.obwei.service.MusicService
@@ -71,7 +71,9 @@ class PlayerFragment: BaseFragment() {
 	}
 	private val queueObserver = Observer<Tracklist> {
 
-		view?.viewPager?.adapter = AlbumArtsAdapter(childFragmentManager).apply { data = it }
+		if (view?.viewPager?.adapter != null && view?.viewPager?.adapter is AlbumArtsAdapter) {
+			(view?.viewPager?.adapter as? AlbumArtsAdapter)?.data = it
+		} else view?.viewPager?.adapter = AlbumArtsAdapter().apply { data = it }
 
 		view?.viewPager?.currentItem = cServiceState?.position ?: 0
 		(view?.queueRv?.adapter as? QueueAdapter)?.data = it
@@ -83,7 +85,7 @@ class PlayerFragment: BaseFragment() {
 		view?.currentPlayerProgress?.text = millisToString(it.toLong())
 
 	}
-	private val onPageChangeListener =  object : ViewPager.SimpleOnPageChangeListener(){
+	private val onPageChangeListener =  object : ViewPager2.OnPageChangeCallback(){
 		override fun onPageSelected(position: Int) {
 
 			if (position != cServiceState?.position && runIndexSelected)
@@ -266,13 +268,14 @@ class PlayerFragment: BaseFragment() {
 			this.addItemDecoration(MarginDecor(8.dp, 4.dp), 0)
 
 			itemTouchHelper.attachToRecyclerView(this)
-
 		}
 
-		view.layoutRoot.setTransitionListener( object : MotionLayout.TransitionListener {
+		view.layoutRoot.setTransitionListener(object : MotionLayout.TransitionListener {
 
 			override fun onTransitionTrigger(p0: MotionLayout?, p1: Int, p2: Boolean, p3: Float) {}
-			override fun onTransitionStarted(p0: MotionLayout?, p1: Int, p2: Int) {}
+			override fun onTransitionStarted(p0: MotionLayout?, p1: Int, p2: Int) {
+				this@PlayerFragment.viewPager?.isEnabled = false
+			}
 			override fun onTransitionChange(p0: MotionLayout?, p1: Int, p2: Int, p3: Float) {
 
 				imageView.rotation = p3*180
@@ -280,12 +283,14 @@ class PlayerFragment: BaseFragment() {
 
 			}
 			override fun onTransitionCompleted(p0: MotionLayout?, p1: Int) {
-
-				if (p1 == R.id.queueStart) {
-					moveRecycler = true
-					this@PlayerFragment.view?.queueRv?.scrollToCenter(cServiceState?.position ?: 0)
-				} else if (p1 == R.id.queueEnd)
-					moveRecycler = false
+				this@PlayerFragment.viewPager?.isEnabled = true
+				when (p1) {
+					R.id.queueStart -> {
+						moveRecycler = true
+						this@PlayerFragment.view?.queueRv?.scrollToCenter(cServiceState?.position ?: 0)
+					}
+					R.id.queueEnd   -> moveRecycler = false
+				}
 
 			}
 
@@ -332,7 +337,7 @@ class PlayerFragment: BaseFragment() {
 			}
 		})
 
-		view.viewPager.addOnPageChangeListener(onPageChangeListener)
+		view.viewPager.registerOnPageChangeCallback(onPageChangeListener)
 
 		view.progressSeekBar.thumb = makeThumbDrawableForSeekBar(Color.WHITE)
 
@@ -347,6 +352,11 @@ class PlayerFragment: BaseFragment() {
 		view?.viewPager?.adapter?.notifyDataSetChanged()
 
 	}
+	override fun onHiddenChanged(hidden: Boolean) {
+		super.onHiddenChanged(hidden)
+		if (hidden) view?.layoutRoot?.progress = 0f
+		if (SDK_INT >= 23) activity?.window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+	}
 	override fun onDestroyView() {
 		super.onDestroyView()
 
@@ -357,22 +367,9 @@ class PlayerFragment: BaseFragment() {
 			it.shuffleButton.setOnClickListener(null)
 			it.repeatButton.setOnClickListener(null)
 			it.progressSeekBar.setOnSeekBarChangeListener(null)
-			it.viewPager.removeOnPageChangeListener(onPageChangeListener)
+			it.viewPager.unregisterOnPageChangeCallback(onPageChangeListener)
 		}
 		if (SDK_INT >= 23) activity?.window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-
-	}
-
-	inner class AlbumArtsAdapter(fm: FragmentManager): FragmentStatePagerAdapter(fm) {
-
-		var data: Tracklist by Delegates.observable(arrayListOf()) {_, _, _ -> notifyDataSetChanged() }
-
-		override fun getItem(position: Int): Fragment {
-			val i = position % data.size
-			return AlbumArtFragment.newInstance( data[i] )
-		}
-
-		override fun getCount(): Int = data.size // supports infinite viewpager
 
 	}
 

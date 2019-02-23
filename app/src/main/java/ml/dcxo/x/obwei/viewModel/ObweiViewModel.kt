@@ -2,6 +2,7 @@ package ml.dcxo.x.obwei.viewModel
 
 import android.app.Application
 import android.database.ContentObserver
+import android.net.Uri
 import android.os.Handler
 import android.provider.MediaStore
 import androidx.lifecycle.*
@@ -75,11 +76,12 @@ class ObweiViewModel(app: Application): AndroidViewModel(app) {
 		var runnable = Runnable { loadEverything() }
 
 		override fun onChange(selfChange: Boolean) {
-			super.onChange(selfChange)
+			onChange(selfChange, null)
+		}
+		override fun onChange(selfChange: Boolean, uri: Uri?) {
 			handler.removeCallbacks(runnable)
 			handler.post(runnable)
 		}
-
 		override fun deliverSelfNotifications(): Boolean = true
 
 	}

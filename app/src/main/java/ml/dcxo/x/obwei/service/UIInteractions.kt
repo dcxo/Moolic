@@ -14,7 +14,7 @@ interface UIInteractions {
 	fun onShuffleButtonClicked()
 	fun onShuffleToggle(boolean: Boolean)
 	fun onRepeatButtonClicked()
-	fun onIndexSelected(selectedIndex: Int)
+	fun onIndexSelected(selectedIndex: Int): Boolean
 	fun onAddToQueue(songs: Tracklist, allSongs: Tracklist = Tracklist(), indexInList: Int)
 	fun onSeekBarProgressChange(int: Int)
 	fun onRemoveFromQueue(position: Int)

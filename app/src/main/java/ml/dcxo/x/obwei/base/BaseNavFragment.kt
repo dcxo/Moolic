@@ -26,9 +26,7 @@ import ml.dcxo.x.obwei.viewModel.Tracklist
 abstract class BaseNavFragment<Item: Model, Adapter: BaseAdapter<Item, *>>: BaseFragment(),
 	SearchView.OnQueryTextListener {
 
-	val notifyRemove: NotifyRemoveFun = { i: Int ->
-		view?.getAdapter()?.notifyItemRemoved(i)
-	}
+	val notifyRemove: NotifyRemoveFun = {}
 
 	override val layoutInflated: Int = R.layout.fragment_nav
 
@@ -86,7 +84,6 @@ abstract class BaseNavFragment<Item: Model, Adapter: BaseAdapter<Item, *>>: Base
 		touchHelper?.attachToRecyclerView(view.recyclerNav)
 
 	}
-
 	override fun onDestroyView() {
 
 		view?.fabNav?.setOnClickListener(null)
@@ -112,5 +109,6 @@ abstract class BaseNavFragment<Item: Model, Adapter: BaseAdapter<Item, *>>: Base
 	abstract fun getToolbarTitle(): String
 	abstract fun getLiveData(): LiveData<ArrayList<Item>>
 	abstract fun getAdapterAndLayoutManager(context: Context): Pair<Adapter, RecyclerView.LayoutManager>
+	open fun Item.getAlbumArtUri(): String = ""
 
 }

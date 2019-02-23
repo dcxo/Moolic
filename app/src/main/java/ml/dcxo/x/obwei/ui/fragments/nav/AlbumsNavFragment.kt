@@ -17,11 +17,12 @@ import ml.dcxo.x.obwei.viewModel.Album
  */
 class AlbumsNavFragment: BaseNavFragment<Album, AlbumsAdapter>() {
 
-	override val click: ((Album, Int) -> Unit)? = { album, i ->
+	override val click: ((Album, Int) -> Unit)? = { album, _ ->
 		mActivity?.hideKeyboard()
 
 		val l = Transformations.switchMap(getLiveData()) {
-			return@switchMap MutableLiveData<Album>().apply { value = it[i] }
+			val forLiveAlbum = it.firstOrNull { listAlbum -> listAlbum.id == album.id }
+			return@switchMap MutableLiveData<Album>().apply { value = forLiveAlbum }
 		}
 		(activity as? UniqueActivity)?.showAlbum(l)
 	}

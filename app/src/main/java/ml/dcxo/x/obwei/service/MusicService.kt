@@ -3,7 +3,6 @@ package ml.dcxo.x.obwei.service
 import android.app.PendingIntent
 import android.app.Service
 import android.content.*
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.*
 import android.os.*
@@ -17,13 +16,11 @@ import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.media.session.MediaButtonReceiver
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
+import androidx.room.Room
 import kotlinx.coroutines.*
 import ml.dcxo.x.obwei.AmbiColor
+import ml.dcxo.x.obwei.db.queue.Queue
+import ml.dcxo.x.obwei.db.queue.QueueDB
 import ml.dcxo.x.obwei.utils.Settings
 import ml.dcxo.x.obwei.utils.mediaSessionKey
 import ml.dcxo.x.obwei.viewModel.Song
@@ -55,6 +52,7 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 	}
 	var cPosition by Delegates.observable(-1) {_, _, newPosition ->
 		liveServiceState.postValue( ServiceState(position = newPosition) )
+		launch { db.queueDAO().updateQueuePosition(newPosition) }
 	}
 	var cShuffleMode by Delegates.observable(false) {_, _, newShuffleMode ->
 
@@ -92,6 +90,7 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 	val liveQueue = MutableLiveData<Tracklist>()
 	val qSortedQueue = arrayListOf<Song>()
 	var qQueue by Delegates.observable(arrayListOf<Song>()) {_, _, newQueue ->
+		saveQueue()
 		liveQueue.postValue(newQueue)
 	}
 	/* Current player progress vars */
@@ -99,10 +98,13 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 
 	private var servicePetitions: ServicePetitions? = null
 	private var isPausedFromAudioFocusChanges = false
+	private var isQueueInitializedFromCreate = false
+
 	private val mBinder = MusicServiceBinder()
+	private val db by lazy { Room.databaseBuilder(applicationContext, QueueDB::class.java, "queue-db").build() }
 	private val preparedListener = MediaPlayer.OnPreparedListener {
 
-		it.play()
+		if (cPlaybackStateCompat.state == PlaybackStateCompat.STATE_PLAYING) it.play()
 		fetchMetadataAndAmbiColor()
 
 	}
@@ -118,12 +120,6 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 		override fun onPause() = player.obweiPause()
 		override fun onSkipToPrevious() = player.skipToPrevious(true)
 		override fun onSkipToNext() = player.skipToNext(true)
-	}
-	private val pauseJob = launch(start = CoroutineStart.LAZY) {
-
-		delay( 600_000L )
-		stopSelf()
-
 	}
 	private val handler = Handler()
 	private val mActions = {
@@ -163,12 +159,12 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 		.setUsage(AudioAttributes.USAGE_MEDIA)
 		.build()
 
-	private val audioFocusRequest = if (SDK_INT >= Build.VERSION_CODES.O)
+	private val audioFocusRequest = if (SDK_INT >= Build.VERSION_CODES.O) {
 		AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
 			.setOnAudioFocusChangeListener(audioFocusChangeListener)
 			.setAudioAttributes(audioAttributes)
 			.build()
-	else null
+	} else null
 
 
 	private fun fetchMetadataAndAmbiColor() = launch {
@@ -190,10 +186,14 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 				iStream = contentResolver.openInputStream(cSong.getAlbumArtURI.toUri())
 				val b = BitmapFactory.decodeStream(iStream)
 
+				cAmbiColor = ambiColorCache[cSong.albumId] ?: AmbiColor(b)
+
 				mediaMetadataCompat.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, b)
 
 
-			} catch (e: FileNotFoundException) {}
+			} catch (e: FileNotFoundException) {
+				cAmbiColor = AmbiColor.NULL
+			}
 			iStream?.close()
 
 			mSession.setMetadata(mediaMetadataCompat.build())
@@ -201,23 +201,7 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 		}
 
 	}
-	private fun setAmbiColor() {
 
-		Glide.with(this).asBitmap().load(cSong.getAlbumArtURI)
-			.listener(object: RequestListener<Bitmap> {
-				override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Bitmap>?, isFirstResource: Boolean): Boolean {
-					cAmbiColor = AmbiColor.NULL
-					return false
-				}
-
-				override fun onResourceReady(resource: Bitmap?, model: Any?, target: Target<Bitmap>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
-					cAmbiColor = ambiColorCache[cSong.albumId] ?: AmbiColor(resource)
-					return true
-				}
-
-			}).preload()
-
-	}
 	private fun getAudioFocus(): Int {
 
 		return if (SDK_INT >= Build.VERSION_CODES.O)
@@ -240,6 +224,36 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 			PlaybackStateCompat.STATE_PAUSED  -> player.play()
 			else                              -> throw IllegalStateException()
 		}
+	}
+	private fun initQueue(queue: Queue) {
+
+		if (queue.queue.isNotEmpty()) {
+			qQueue = queue.queue
+			cPosition = queue.queuePosition
+
+			cSong = qQueue[cPosition]
+
+			player.reset()
+			try {
+				player.setDataSource(cSong.filePath)
+				cPlaybackStateCompat = playbackState(PlaybackStateCompat.STATE_PAUSED)
+				player.prepareAsync()
+			} catch (e: IOException) {
+			}
+			isQueueInitializedFromCreate = true
+		}
+
+	}
+	private fun saveQueue() {
+
+		val queue = Queue(
+			queue = qQueue,
+			queuePosition = cPosition,
+			songDurationPosition = 0
+		)
+
+		launch { db.queueDAO().insertQueue(queue) }
+
 	}
 
 	override fun onCreate() {
@@ -271,6 +285,8 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 
 		mSession.isActive = true
 
+		launch { db.queueDAO().getQueue()?.let { initQueue(it) } }
+
 	}
 	override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
@@ -281,6 +297,10 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 			NEXT -> player.skipToNext(true)
 			PREVIOUS -> player.skipToPrevious(true)
 			DELETE -> stopSelf()
+			PLAY_SONG -> {
+				val song = intent.getParcelableExtra<Song>(SONG)
+				onSongSelected(song, arrayListOf(song), 0)
+			}
 		}
 
 		return super.onStartCommand(intent, flags, startId)
@@ -292,6 +312,8 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 		return super.onUnbind(intent)
 	}
 	override fun onDestroy() {
+
+		db.close()
 
 		player.stop()
 		player.release()
@@ -305,11 +327,8 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 
 		notification.stop()
 
-		servicePetitions?.closePlayer(true)
-
 		ambiColorCache.evictAll()
 
-		pauseJob.cancel()
 		handler.removeCallbacks(progressJob)
 
 		unregisterReceiver(noisy)
@@ -373,13 +392,13 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 		}
 
 	}
-	override fun onIndexSelected(selectedIndex: Int) {
+	override fun onIndexSelected(selectedIndex: Int): Boolean {
 
 		cPosition = selectedIndex
 		val song = qQueue[cPosition]
 
 		if ( song.id != cSong.id ) cSong = song
-		player.obweiPrepare()
+		return player.obweiPrepare()
 
 	}
 	override fun onAddToQueue(songs: Tracklist, allSongs: Tracklist, indexInList: Int) {
@@ -433,7 +452,6 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 
 		if (getAudioFocus() == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
 			handler.post(progressJob)
-			pauseJob.cancel()
 			start()
 			cPlaybackStateCompat = playbackState(PlaybackStateCompat.STATE_PLAYING, player.currentPosition.toLong())
 		}
@@ -441,7 +459,6 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 	}
 	override fun MediaPlayer.obweiPause() {
 
-		launch { pauseJob.join() }
 		pause()
 		cPlaybackStateCompat = playbackState(PlaybackStateCompat.STATE_PAUSED, player.currentPosition.toLong())
 
@@ -483,16 +500,19 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 		cSong = qQueue[cPosition]
 		player.obweiPrepare()
 	}
-	override fun MediaPlayer.obweiPrepare() {
+	override fun MediaPlayer.obweiPrepare(): Boolean {
 
-		if (cSong == Song.NULL) return
-		setAmbiColor()
+		if (cSong == Song.NULL) return false
 
 		reset()
-		try {
+		return try {
+			cPlaybackStateCompat = playbackState(PlaybackStateCompat.STATE_PLAYING)
 			setDataSource(cSong.filePath)
 			prepareAsync()
-		} catch (e: IOException) {}
+			true
+		} catch (e: IOException) {
+			false
+		}
 
 	}
 
@@ -526,6 +546,8 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 		const val PREVIOUS = "X_PREVIOUS_X"
 		const val NEXT = "X_NEXT_X"
 		const val DELETE = "X_DELETE_X"
+		const val PLAY_SONG = "X_PLAY_SONG_x"
+		const val SONG = "X_SONG_x"
 
 	}
 

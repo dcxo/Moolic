@@ -10,7 +10,7 @@ import java.lang.Math.min
 /**
  * Created by David on 02/11/2018 for XOXO
  */
-class AmbiColor() {
+class AmbiColor private constructor() {
 
 	constructor(bitmap: Bitmap?) : this() {
 
@@ -50,8 +50,8 @@ class AmbiColor() {
 		val w = ColorUtils.calculateMinimumAlpha(primaryColor, Color.WHITE, 3f)
 		val dg = ColorUtils.calculateMinimumAlpha(primaryColor, Color.DKGRAY, 3f)
 		primaryBgColor = when {
-			w != -1  -> ColorUtils.setAlphaComponent(Color.WHITE, 255)
 			dg != -1 -> ColorUtils.setAlphaComponent(Color.DKGRAY, 255)
+			w != -1  -> ColorUtils.setAlphaComponent(Color.WHITE, 255)
 			else     -> ColorUtils.setAlphaComponent(Color.BLACK, 255)
 		}
 

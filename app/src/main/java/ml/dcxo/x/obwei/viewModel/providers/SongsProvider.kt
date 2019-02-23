@@ -13,7 +13,7 @@ import ml.dcxo.x.obwei.viewModel.Tracklist
 @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
 object SongsProvider {
 
-	private val projection = arrayOf(
+	val projection = arrayOf(
 		MediaStore.Audio.Media._ID,         //0
 		MediaStore.Audio.Media.TITLE,       //1
 		MediaStore.Audio.Media.ALBUM_ID,    //2

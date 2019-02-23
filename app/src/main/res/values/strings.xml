@@ -1,5 +1,5 @@
 <resources>
-	<string name="appName" translatable="false">Mukolor</string>
+	<string name="appName" translatable="false">Moolic</string>
 
 	<string name="songs">Songs</string>
 	<string name="home">Home</string>

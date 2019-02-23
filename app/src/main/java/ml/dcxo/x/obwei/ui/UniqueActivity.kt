@@ -9,6 +9,7 @@ import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.os.Bundle
 import android.os.IBinder
+import android.provider.MediaStore
 import android.support.v4.media.session.PlaybackStateCompat
 import android.view.MenuItem
 import android.view.View
@@ -36,6 +37,7 @@ import ml.dcxo.x.obwei.ui.fragments.metadataEditors.AlbumMetadataEditorFragment
 import ml.dcxo.x.obwei.ui.fragments.nav.*
 import ml.dcxo.x.obwei.utils.*
 import ml.dcxo.x.obwei.viewModel.*
+import ml.dcxo.x.obwei.viewModel.providers.SongsProvider
 import kotlin.coroutines.CoroutineContext
 import kotlin.properties.Delegates
 
@@ -95,6 +97,13 @@ class UniqueActivity : AppCompatActivity(), BottomNavigationView.OnNavigationIte
 
 		override fun onServiceDisconnected(name: ComponentName?) {
 			uiInteractions = null
+
+			serviceState = null
+			queue = null
+			playerPosition = null
+
+			closePlayer(true)
+
 		}
 	}
 
@@ -126,7 +135,7 @@ class UniqueActivity : AppCompatActivity(), BottomNavigationView.OnNavigationIte
 
 		val a = obweiViewModel.getArtist()
 		val b = Transformations.switchMap<ArrayList<Artist>, Artist>(a) {
-			val artist = it.find { artist -> song.artistName == artist.name } ?: throw IllegalStateException()
+			val artist = it.firstOrNull { artist -> song.artistName == artist.name }
 			return@switchMap MutableLiveData<Artist>().apply { value = artist }
 		}
 		showArtist(b)
@@ -158,7 +167,7 @@ class UniqueActivity : AppCompatActivity(), BottomNavigationView.OnNavigationIte
 				R.anim.slide_up,
 				R.anim.slide_down
 			)
-			.hide(f)
+			.remove(f)
 			.commit()
 		return true
 
@@ -275,8 +284,37 @@ class UniqueActivity : AppCompatActivity(), BottomNavigationView.OnNavigationIte
 			navMenu.setOnNavigationItemReselectedListener(this)
 		}
 
-		if (intent.action == OPEN_PLAYER) openPlayer()
+	}
+	override fun onResume() {
+		super.onResume()
+		when (intent.action) {
+			OPEN_PLAYER        -> openPlayer()
+			Intent.ACTION_VIEW -> {
+				val s = intent.data?.path
+				s?.let {
+					contentResolver.query(
+						MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+						SongsProvider.projection,
+						"${MediaStore.Audio.Media.DATA}=?",
+						arrayOf(it), null
+					).use { crs ->
 
+						if (!crs.moveToFirst()) return@use
+
+						val song = SongsProvider.createSong(crs)
+						val songIntent = Intent(this, MusicService::class.java).apply {
+							action = MusicService.PLAY_SONG
+							putExtra(MusicService.SONG, song)
+						}
+						startService(songIntent)
+
+					}
+
+					intent.setData(null)
+
+				}
+			}
+		}
 	}
 	override fun onSaveInstanceState(outState: Bundle) {
 
@@ -295,8 +333,10 @@ class UniqueActivity : AppCompatActivity(), BottomNavigationView.OnNavigationIte
 	override fun onDestroy() {
 		super.onDestroy()
 
-		Glide.get(this).clearDiskCache()
+		launch(Dispatchers.Default) { Glide.get(this@UniqueActivity).clearDiskCache() }
+
 		Glide.get(this).clearMemory()
+		System.gc()
 
 		unbindService(serviceConnection)
 
@@ -382,7 +422,7 @@ class UniqueActivity : AppCompatActivity(), BottomNavigationView.OnNavigationIte
 		} else {
 			transaction.show(fragment)
 		}
-		transaction.commit()
+		transaction.commitAllowingStateLoss()
 
 	}
 	override fun closePlayer(destroy: Boolean): Boolean {

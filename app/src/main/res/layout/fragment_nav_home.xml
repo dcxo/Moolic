@@ -7,12 +7,26 @@
 	<androidx.recyclerview.widget.RecyclerView
 		android:id="@+id/recyclerNav"
 		android:layout_width="match_parent"
-		android:layout_height="match_parent"
+		android:layout_height="0dp"
 		android:clipToPadding="false"
 		android:paddingBottom="@dimen/minUnit"
-		android:paddingTop="100dp"
 		android:paddingEnd="@dimen/minUnit"
-		android:paddingStart="@dimen/minUnit"/>
+		android:paddingStart="@dimen/minUnit"
+		app:layout_constraintTop_toBottomOf="@id/title"
+		app:layout_constraintBottom_toBottomOf="parent"/>
+
+	<TextView
+		android:id="@+id/title"
+		android:textAppearance="@style/TextAppearance.Obwei.Headline1"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:gravity="center"
+		android:paddingBottom="4dp"
+		android:paddingTop="8dp"
+		app:layout_constraintRight_toRightOf="parent"
+		app:layout_constraintLeft_toLeftOf="parent"
+		app:layout_constraintTop_toBottomOf="@id/headerNav"
+		android:text="Playlists"/>
 
 	<androidx.constraintlayout.widget.ConstraintLayout
 		android:id="@+id/headerNav"
@@ -35,12 +49,12 @@
 			app:srcCompat="@drawable/icon_edit_list"/>
 
 		<TextView
+			android:textAppearance="@style/TextAppearance.Obwei.Headline1"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:text="@string/appName"
-			android:textSize="32sp"
-			android:fontFamily="@font/oxygen_bold"
 			android:textColor="#000"
+			android:fontFamily="@font/oxygen_bold"
 			android:alpha="0.618"
 			app:layout_constraintTop_toTopOf="parent"
 			app:layout_constraintBottom_toBottomOf="parent"
