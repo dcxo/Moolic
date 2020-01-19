@@ -30,20 +30,29 @@
 
 	<TextView
 		android:id="@+id/currentPlayerProgress"
-		android:layout_width="wrap_content"
+		android:layout_width="0dp"
 		android:layout_height="wrap_content"
+		android:layout_marginStart="8dp"
 		android:layout_marginEnd="4dp"
 		android:fontFamily="@font/oxygen_bold"
+		android:text="00:00"
+		android:gravity="center_vertical|right"
 		app:layout_constraintBottom_toBottomOf="@id/floatingActionButton"
-		app:layout_constraintEnd_toStartOf="@id/floatingActionButton"/>
+		app:layout_constraintEnd_toStartOf="@id/floatingActionButton"
+		app:layout_constraintStart_toStartOf="@+id/playerControls" />
+
 	<TextView
 		android:id="@+id/songDuration"
-		android:layout_width="wrap_content"
+		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:layout_marginStart="4dp"
+		android:layout_marginEnd="8dp"
 		android:fontFamily="@font/oxygen_bold"
+		android:gravity="center_vertical|left"
+		android:text="00:00"
 		app:layout_constraintBottom_toBottomOf="@id/floatingActionButton"
-		app:layout_constraintStart_toEndOf="@id/floatingActionButton"/>
+		app:layout_constraintEnd_toEndOf="@+id/playerControls"
+		app:layout_constraintStart_toEndOf="@id/floatingActionButton" />
 
 	<com.google.android.material.card.MaterialCardView
 		android:id="@+id/playerControls"
@@ -110,10 +119,11 @@
 		app:layout_constraintWidth_percent="0.7"
 		tools:background="@color/blue_500"/>
 
-	<androidx.viewpager2.widget.ViewPager2
+	<androidx.viewpager.widget.ViewPager
 		android:id="@+id/viewPager"
 		android:layout_width="0dp"
 		android:layout_height="0dp"
+		android:clipToPadding="false"
 		app:layout_constraintBottom_toBottomOf="@+id/widthHelper"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
@@ -128,7 +138,7 @@
 		app:layout_constraintRight_toRightOf="parent"/>
 
 	<TextView
-		android:id="@+id/songTitle"
+		android:id="@+id/playerSongTitle"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:layout_marginBottom="4dp"

@@ -6,7 +6,7 @@
 	android:layout_height="wrap_content">
 
 	<TextView
-		android:id="@+id/songTitle"
+		android:id="@+id/dbSongTitle"
 		android:layout_width="0dp"
 		android:layout_height="wrap_content"
 		android:fontFamily="@font/oxygen_bold"
@@ -34,7 +34,7 @@
 		app:layout_constraintBottom_toTopOf="@+id/addToPlaylistOption"
 		app:layout_constraintEnd_toEndOf="parent"
 		app:layout_constraintStart_toStartOf="parent"
-		app:layout_constraintTop_toBottomOf="@+id/songTitle" />
+		app:layout_constraintTop_toBottomOf="@+id/dbSongTitle" />
 
 	<TextView
 		android:id="@+id/addToPlaylistOption"

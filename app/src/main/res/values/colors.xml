@@ -2,13 +2,13 @@
 <resources>
 	<color name="colorPrimary">@color/yellow_500</color>
 	<color name="colorPrimaryDark">@color/yellow_900</color>
-	<color name="colorAccent">@color/pink_700</color>
-	<color name="alphaColorAccent">#80F35791</color>
+	<color name="colorAccent">@color/blue_500</color>
+	<color name="alphaColorAccent">#802f83e0</color>
 
 	<color name="colorWarn">@color/yellow_900</color>
 	<color name="colorDanger">@color/pink_900</color>
 
-	<color name="yellow_50">#fef9ea</color>
+	<color name="yellow_50">#6B5D80</color>
 	<color name="yellow_100">#fcefca</color>
 	<color name="yellow_200">#fae5a6</color>
 	<color name="yellow_300">#f8db82</color>

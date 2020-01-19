@@ -2,112 +2,96 @@ package ml.dcxo.x.obwei
 
 import android.graphics.Bitmap
 import android.graphics.Color
-import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.*
 import androidx.palette.graphics.Palette
-import java.lang.Math.abs
-import java.lang.Math.min
+import kotlinx.coroutines.*
+import java.lang.Exception
+import kotlin.coroutines.CoroutineContext
 
 /**
- * Created by David on 02/11/2018 for XOXO
+ * Created by David on 07/03/2019 for ObweiX
  */
 class AmbiColor private constructor() {
 
-	constructor(bitmap: Bitmap?) : this() {
+	var color = Color.LTGRAY; private set
+	val textColor by lazy { computeTextColor(color) }
+	val bgColor by lazy { computeBGColor(color) }
 
-		if (bitmap == null) return
+	private fun computeTextColor(color: Int): Int {
 
-		val palette = Palette.from(bitmap).generate()
+		val minWhiteAlpha = ColorUtils.calculateMinimumAlpha(color, Color.WHITE, 4.5f)
+		val minBlackAlpha = ColorUtils.calculateMinimumAlpha(color, Color.BLACK, 4.5f)
 
-		selectSwatch( palette.vibrantSwatch )
-		selectSwatch( palette.mutedSwatch )
-		selectSwatch( palette.lightMutedSwatch )
-		selectSwatch( palette.lightVibrantSwatch )
-		selectSwatch( palette.dominantSwatch )
-
-		if (!secondarySelected) forceSecondary()
-
-	}
-
-	private lateinit var primarySwatch: Palette.Swatch
-
-	var primaryColor: Int = Color.WHITE
-	var primaryTextColor: Int = Color.BLACK
-	var primaryBgColor: Int = Color.BLACK
-	var secondaryColor: Int = Color.WHITE
-	var secondaryTextColor: Int = Color.BLACK
-
-	private var secondarySwatch: Palette.Swatch? = null
-	private var primarySelected = false
-	private var secondarySelected = false
-
-	private fun primarySwatch(s: Palette.Swatch) {
-
-		primarySwatch = s
-		primaryColor = s.rgb
-		primaryTextColor = s.titleTextColor
-		primarySelected = true
-
-		val w = ColorUtils.calculateMinimumAlpha(primaryColor, Color.WHITE, 3f)
-		val dg = ColorUtils.calculateMinimumAlpha(primaryColor, Color.DKGRAY, 3f)
-		primaryBgColor = when {
-			dg != -1 -> ColorUtils.setAlphaComponent(Color.DKGRAY, 255)
-			w != -1  -> ColorUtils.setAlphaComponent(Color.WHITE, 255)
-			else     -> ColorUtils.setAlphaComponent(Color.BLACK, 255)
+		return when {
+			minWhiteAlpha != -1 -> Color.WHITE
+			minBlackAlpha != -1 -> Color.BLACK
+			else                -> Color.BLACK
 		}
 
 	}
-	private fun secondarySwatch(s: Palette.Swatch) {
+	private fun computeBGColor(color: Int): Int {
 
-		val contrast = ColorUtils.calculateContrast(primaryColor, s.rgb)
-		val dHue = min(abs(primarySwatch.hsl[0] - s.hsl[0]),360 - abs(primarySwatch.hsl[0] - s.hsl[0])) / 180
+		val w = ColorUtils.calculateMinimumAlpha(color, Color.WHITE, 3f)
+		val dg = ColorUtils.calculateMinimumAlpha(color, Color.DKGRAY, 3f)
 
-		if (dHue > 0.125f && dHue !in 0f..0.125f && contrast <= 4.5f) {
-			secondaryColor = s.rgb
-			secondaryTextColor = s.titleTextColor
-			secondarySwatch = s
-			secondarySelected = true
-		}
-
-	}
-	private fun forceSecondary() {
-
-		val degrees = 30f
-		val hsl = primarySwatch.hsl.clone()
-		when (hsl[0]) {
-			in 0f..90f    -> hsl[0] += degrees
-			in 91f..1800f -> hsl[0] -= degrees
-			in 181f..270f -> hsl[0] += degrees
-			in 271f..359f -> hsl[0] -= degrees
-		}
-		secondaryColor = ColorUtils.HSLToColor(hsl)
-
-		val b = ColorUtils.calculateMinimumAlpha(Color.BLACK, secondaryColor, 3f)
-		val w = ColorUtils.calculateMinimumAlpha(Color.WHITE, secondaryColor, 3f)
-		secondaryTextColor = if (b != -1) {
-			ColorUtils.setAlphaComponent(Color.BLACK, b)
-		} else {
-			ColorUtils.setAlphaComponent(Color.WHITE, w)
-		}
-
-	}
-	private fun selectSwatch(s: Palette.Swatch?) {
-		s?.let {
-
-			if (!primarySelected) primarySwatch(s)
-			else if (!secondarySelected) secondarySwatch(s)
-			else return
-
+		return when {
+			dg != -1 -> Color.DKGRAY
+			w != -1  -> Color.WHITE
+			else     -> Color.BLACK
 		}
 	}
 
-	override fun equals(other: Any?): Boolean =
-		other is AmbiColor && primaryColor != other.primaryColor &&
-				secondaryColor != other.secondaryColor && primaryTextColor != other.primaryTextColor &&
-				secondaryTextColor != other.secondaryTextColor
+	override operator fun equals(other: Any?): Boolean {
+		return other is AmbiColor && color == other.color
+	}
+	override fun hashCode(): Int {
+		return color
+	}
 
 	companion object {
-
 		val NULL = AmbiColor()
+	}
+
+	class Builder : CoroutineScope {
+
+		override val coroutineContext: CoroutineContext = DispatcherAsyncTask
+		private var bBitmap: Bitmap? = null
+		private var color: Int? = null
+
+		fun setBitmap(bitmap: Bitmap?): Builder {
+
+			if (color != null) throw Exception("Color has been setted")
+			bBitmap = bitmap?.scale(32, 32)
+
+			return this
+		}
+		fun setColor(c: Int?): Builder {
+			if (bBitmap != null) throw Exception("Bitmap has been setted")
+			color = c
+			return this
+		}
+		fun buildAsync() = async {
+
+			val b = bBitmap ?: color ?: return@async AmbiColor()
+
+			when (b) {
+				is Bitmap -> {
+					val ambiColor = AmbiColor()
+					val palette = Palette.from(b).generate()
+					palette.apply {
+
+						ambiColor.color = swatches.maxBy {
+							-Math.abs(it.hsl[1] - 1f) - Math.abs(it.hsl[2] - 0.5f)
+						}?.rgb ?: Color.LTGRAY
+
+					}
+					return@async ambiColor
+				}
+				is Int -> return@async AmbiColor().apply { color = b }
+				else -> return@async AmbiColor()
+			}
+
+		}
 
 	}
 

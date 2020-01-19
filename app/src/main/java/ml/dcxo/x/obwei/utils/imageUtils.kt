@@ -2,8 +2,7 @@ package ml.dcxo.x.obwei.utils
 
 import android.content.res.Resources
 import android.graphics.*
-import android.graphics.drawable.GradientDrawable
-import android.graphics.drawable.ShapeDrawable
+import android.graphics.drawable.*
 import android.graphics.drawable.shapes.Shape
 import android.view.View
 import androidx.annotation.ColorInt
@@ -52,9 +51,9 @@ fun generateAmbiColorGradient(ambiColor: AmbiColor): GradientDrawable {
 	return GradientDrawable(
 		GradientDrawable.Orientation.TOP_BOTTOM,
 		intArrayOf(
-			ambiColor.secondaryColor,
-			ambiColor.primaryColor,
-			ambiColor.primaryColor
+			ambiColor.color,
+			ambiColor.color,
+			ambiColor.color
 		)
 	)
 }
@@ -91,4 +90,3 @@ fun makeThumbDrawableForSeekBar(@ColorInt c: Int, radius: Float = 5.dp.toFloat()
 		}
 
 	})
-

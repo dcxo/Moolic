@@ -6,6 +6,6 @@ package ml.dcxo.x.obwei.service
 interface ServicePetitions {
 
 	fun openPlayer()
-	fun closePlayer(destroy: Boolean = false): Boolean
+	fun closePlayer(destroy: Boolean = true): Boolean
 
 }

@@ -1,33 +1,35 @@
 package ml.dcxo.x.obwei.ui.fragments
 
+import android.animation.ObjectAnimator
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.graphics.Color
-import android.graphics.PorterDuff
+import android.graphics.*
 import android.graphics.drawable.*
 import android.media.audiofx.AudioEffect
 import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.support.v4.media.session.PlaybackStateCompat
-import android.view.View
-import android.widget.SeekBar
+import android.view.*
+import android.widget.*
 import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.graphics.ColorUtils
-import androidx.core.view.forEach
-import androidx.core.view.updatePadding
+import androidx.core.view.*
+import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.interpolator.view.animation.FastOutSlowInInterpolator
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.*
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
-import androidx.viewpager2.widget.ViewPager2
+import androidx.viewpager.widget.ViewPager
+import kotlinx.android.synthetic.main.fragment_albumart.view.*
 import kotlinx.android.synthetic.main.fragment_player.*
 import kotlinx.android.synthetic.main.fragment_player.view.*
-import ml.dcxo.x.obwei.AmbiColor
+import kotlinx.coroutines.launch
 import ml.dcxo.x.obwei.R
-import ml.dcxo.x.obwei.adapters.AlbumArtsAdapter
 import ml.dcxo.x.obwei.adapters.QueueAdapter
 import ml.dcxo.x.obwei.base.BaseFragment
+import ml.dcxo.x.obwei.AmbiColor
 import ml.dcxo.x.obwei.service.MusicService
 import ml.dcxo.x.obwei.ui.UniqueActivity
 import ml.dcxo.x.obwei.ui.fragments.metadataEditors.SongMetadataEditorFragment
@@ -51,7 +53,9 @@ class PlayerFragment: BaseFragment() {
 	var livePlayerProgress: LiveData<Int>? by Delegates.observable(MutableLiveData()) {_, _, newValue ->
 		newValue?.observe(this, playerProgressObserver)
 	}
+	var liveColor: MutableLiveData<AmbiColor> = MutableLiveData()
 
+	private var width = 1
 	private var cServiceState: MusicService.ServiceState? = null
 	private var moveRecycler = true
 	private var runIndexSelected = true
@@ -63,35 +67,31 @@ class PlayerFragment: BaseFragment() {
 
 		if (it.shuffleMode != cServiceState?.shuffleMode) setShuffleMode(it.shuffleMode)
 		if (it.repeatMode != cServiceState?.repeatMode) setRepeatMode(it.repeatMode)
-		setColors(it.ambiColor)
+		//setColors(it.ambiColor)
 		if (it.playbackState.state != cServiceState?.playbackState?.state) setPlaybackState(it.playbackState)
 
 		cServiceState = it
 
 	}
-	private val queueObserver = Observer<Tracklist> {
-
-		if (view?.viewPager?.adapter != null && view?.viewPager?.adapter is AlbumArtsAdapter) {
-			(view?.viewPager?.adapter as? AlbumArtsAdapter)?.data = it
-		} else view?.viewPager?.adapter = AlbumArtsAdapter().apply { data = it }
-
-		view?.viewPager?.currentItem = cServiceState?.position ?: 0
-		(view?.queueRv?.adapter as? QueueAdapter)?.data = it
-
-	}
+	private val queueObserver = Observer<Tracklist> { setQueue(it) }
+	private val colorsObserver = Observer<AmbiColor> { setColors(it) }
 	private val playerProgressObserver = Observer<Int> {
 
 		view?.progressSeekBar?.progress = it
 		view?.currentPlayerProgress?.text = millisToString(it.toLong())
 
 	}
-	private val onPageChangeListener =  object : ViewPager2.OnPageChangeCallback(){
+	private val onPageChangeListener = object: ViewPager.OnPageChangeListener{
 		override fun onPageSelected(position: Int) {
 
+			view?.viewPager?.isFakeDragging
 			if (position != cServiceState?.position && runIndexSelected)
 				uiInteractions?.onIndexSelected(position % (liveQueue?.value ?: Tracklist()).size)
 
 		}
+
+		override fun onPageScrollStateChanged(state: Int) {}
+		override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {}
 	}
 	private val itemTouchHelper = ItemTouchHelper(
 		object: ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP or ItemTouchHelper.DOWN, ItemTouchHelper.RIGHT) {
@@ -134,28 +134,34 @@ class PlayerFragment: BaseFragment() {
 	private fun setColors(ambiColor: AmbiColor) {
 		view?.apply {
 
-			val colorGradient = generateAmbiColorGradient(ambiColor)
+			val colorGradient = ambiColor.color
 			if (background == null) {
-				background = colorGradient
+				setBackgroundColor(colorGradient)
 			} else {
 
-				val td = TransitionDrawable(arrayOf(background, colorGradient))
-				background = td
-				td.startTransition(440)
+				val i = (background as ColorDrawable).color
+				ObjectAnimator.ofArgb(i, ambiColor.color).apply {
+					interpolator = FastOutSlowInInterpolator()
+					duration = 440
+					addUpdateListener {
+						setBackgroundColor(it.animatedValue as Int)
+					}
+				}.start()
 
 			}
 
-			val nSecondaryTextColor = ColorUtils.setAlphaComponent(ambiColor.secondaryTextColor, 255)
+			val nSecondaryTextColor = ColorUtils.setAlphaComponent(ambiColor.textColor, 255)
 			if (SDK_INT >= 23) {
 
-				when (nSecondaryTextColor) {
-					Color.BLACK -> activity?.window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-					Color.WHITE -> activity?.window?.decorView?.systemUiVisibility = 0
+				activity?.window?.decorView?.systemUiVisibility =  when (nSecondaryTextColor) {
+					Color.BLACK -> View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+					Color.WHITE -> 0
+					else        -> 0
 				}
 
 			}
 
-			songTitle.setTextColor(nSecondaryTextColor)
+			playerSongTitle.setTextColor(nSecondaryTextColor)
 			artistName.setTextColor(nSecondaryTextColor)
 
 			toolbar.menu.forEach {
@@ -164,31 +170,31 @@ class PlayerFragment: BaseFragment() {
 			toolbar.overflowIcon?.setTint(nSecondaryTextColor)
 			toolbar.navigationIcon?.setTint(nSecondaryTextColor)
 
-			currentPlayerProgress.setTextColor(ambiColor.primaryBgColor)
-			songDuration.setTextColor(ambiColor.primaryBgColor)
+			currentPlayerProgress.setTextColor(ambiColor.bgColor)
+			songDuration.setTextColor(ambiColor.bgColor)
 
-			slideMsg.setTextColor(ambiColor.primaryColor)
-			queueTitle.setTextColor(ambiColor.primaryColor)
+			slideMsg.setTextColor(ambiColor.color)
+			queueTitle.setTextColor(ambiColor.color)
 
-			floatingActionButton.backgroundTintList = ColorStateList.valueOf(ambiColor.primaryBgColor)
-			playerControls.setCardBackgroundColor(ambiColor.primaryBgColor)
-			queueCard.setCardBackgroundColor(ambiColor.primaryBgColor)
+			floatingActionButton.backgroundTintList = ColorStateList.valueOf(ambiColor.bgColor)
+			playerControls.setCardBackgroundColor(ambiColor.bgColor)
+			queueCard.setCardBackgroundColor(ambiColor.bgColor)
 
 			shuffleButton.clearColorFilter()
-			shuffleButton.setColorFilter(ambiColor.primaryColor, PorterDuff.Mode.SRC_IN)
+			shuffleButton.setColorFilter(ambiColor.color, PorterDuff.Mode.SRC_IN)
 			repeatButton.clearColorFilter()
-			repeatButton.setColorFilter(ambiColor.primaryColor, PorterDuff.Mode.SRC_IN)
+			repeatButton.setColorFilter(ambiColor.color, PorterDuff.Mode.SRC_IN)
 			floatingActionButton.clearColorFilter()
-			floatingActionButton.setColorFilter(ambiColor.primaryColor, PorterDuff.Mode.SRC_IN)
+			floatingActionButton.setColorFilter(ambiColor.color, PorterDuff.Mode.SRC_IN)
 			imageView.clearColorFilter()
-			imageView.setColorFilter(ambiColor.primaryColor, PorterDuff.Mode.SRC_IN)
+			imageView.setColorFilter(ambiColor.color, PorterDuff.Mode.SRC_IN)
 			imageView2.clearColorFilter()
-			imageView2.setColorFilter(ambiColor.primaryColor, PorterDuff.Mode.SRC_IN)
+			imageView2.setColorFilter(ambiColor.color, PorterDuff.Mode.SRC_IN)
 
 			val l = (progressSeekBar.progressDrawable as LayerDrawable).apply {
 				setDrawableByLayerId(
 					android.R.id.background,
-					makeBackgroundDrawableForSeekBar(ambiColor.primaryColor)
+					makeBackgroundDrawableForSeekBar(ambiColor.color)
 				)
 				setDrawableByLayerId(
 					android.R.id.secondaryProgress,
@@ -200,13 +206,13 @@ class PlayerFragment: BaseFragment() {
 				)
 			}
 			progressSeekBar.progressDrawable = l
-			progressSeekBar.thumb.setColorFilter(ambiColor.primaryBgColor, PorterDuff.Mode.SRC_IN)
+			progressSeekBar.thumb.setColorFilter(ambiColor.bgColor, PorterDuff.Mode.SRC_IN)
 
 		}
 	}
 	private fun setSongInfo(song: Song) {
 
-		view?.songTitle?.text = song.title
+		view?.playerSongTitle?.text = song.title
 		view?.artistName?.text = song.artistName
 		view?.progressSeekBar?.max = song.duration.toInt()
 		view?.songDuration?.text = millisToString(song.duration)
@@ -246,20 +252,35 @@ class PlayerFragment: BaseFragment() {
 	private fun updatePosition(position: Int) {
 
 		runIndexSelected = false
-		view?.viewPager?.currentItem = position
+		view?.viewPager?.setCurrentItem(position, true)
 		runIndexSelected = true
 		(view?.queueRv?.adapter as? QueueAdapter)?.currentPosition = position
 		if (moveRecycler) view?.queueRv?.scrollToCenter(position)
 
 	}
+	private fun setQueue(it: Tracklist) {
 
+		view?.viewPager?.adapter = AlbumArtsAdapter().apply { data = it }
+		view?.viewPager?.currentItem = cServiceState?.position ?: 0
+
+		(view?.queueRv?.adapter as? QueueAdapter)?.data = it
+
+	}
+	private fun startDragFunc(holder: QueueAdapter.QueueVH) {
+		itemTouchHelper.startDrag(holder)
+	}
+
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		liveColor.observe(this, colorsObserver)
+	}
 	override fun editOnCreateView(view: View) {
 
 		view.setOnClickListener {}
 		view.background = null
 
 		view.queueRv.apply {
-			this.adapter = QueueAdapter().apply {
+			this.adapter = QueueAdapter(this@PlayerFragment::startDragFunc).apply {
 				click = { _, i -> if (i != cServiceState?.position) uiInteractions?.onIndexSelected(i) }
 			}
 			this.layoutManager = LinearLayoutManager(view.context, RecyclerView.VERTICAL, false)
@@ -273,9 +294,7 @@ class PlayerFragment: BaseFragment() {
 		view.layoutRoot.setTransitionListener(object : MotionLayout.TransitionListener {
 
 			override fun onTransitionTrigger(p0: MotionLayout?, p1: Int, p2: Boolean, p3: Float) {}
-			override fun onTransitionStarted(p0: MotionLayout?, p1: Int, p2: Int) {
-				this@PlayerFragment.viewPager?.isEnabled = false
-			}
+			override fun onTransitionStarted(p0: MotionLayout?, p1: Int, p2: Int) {}
 			override fun onTransitionChange(p0: MotionLayout?, p1: Int, p2: Int, p3: Float) {
 
 				imageView.rotation = p3*180
@@ -283,7 +302,6 @@ class PlayerFragment: BaseFragment() {
 
 			}
 			override fun onTransitionCompleted(p0: MotionLayout?, p1: Int) {
-				this@PlayerFragment.viewPager?.isEnabled = true
 				when (p1) {
 					R.id.queueStart -> {
 						moveRecycler = true
@@ -323,7 +341,7 @@ class PlayerFragment: BaseFragment() {
 			true
 		}
 		view.toolbar.setNavigationIcon(R.drawable.icon_back)
-		view.toolbar.setNavigationOnClickListener { fragmentManager?.beginTransaction()?.hide(this)?.commit() }
+		view.toolbar.setNavigationOnClickListener { mActivity?.closePlayer() }
 
 		view.floatingActionButton.setOnClickListener { uiInteractions?.onPlayPauseButtonClicked() }
 		view.shuffleButton.setOnClickListener { uiInteractions?.onShuffleButtonClicked() }
@@ -337,13 +355,23 @@ class PlayerFragment: BaseFragment() {
 			}
 		})
 
-		view.viewPager.registerOnPageChangeCallback(onPageChangeListener)
+		view.viewPager.addOnPageChangeListener(onPageChangeListener)
+		view.viewPager.pageMargin = 16.dp
+		view.viewPager.setPageTransformer(false) {page, position ->
+			page.cardAlbumArt.cardElevation = ((-8).dp * Math.abs(position) + 8.dp)
+		}
+		view.viewPager.currentItem = liveStateService?.value?.position ?: 0
 
 		view.progressSeekBar.thumb = makeThumbDrawableForSeekBar(Color.WHITE)
 
 	}
 	override fun onActivityCreated(savedInstanceState: Bundle?) {
 		super.onActivityCreated(savedInstanceState)
+
+		val point = Point()
+		view?.display?.getSize(point)
+		width = point.x
+		view?.viewPager?.updatePadding(left = 46.dp, right = 46.dp)
 
 		liveStateService = (activity as? UniqueActivity)?.serviceState
 		livePlayerProgress = (activity as? UniqueActivity)?.playerPosition
@@ -354,8 +382,23 @@ class PlayerFragment: BaseFragment() {
 	}
 	override fun onHiddenChanged(hidden: Boolean) {
 		super.onHiddenChanged(hidden)
-		if (hidden) view?.layoutRoot?.progress = 0f
-		if (SDK_INT >= 23) activity?.window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+
+		if (hidden) {
+			view?.layoutRoot?.progress = 0f
+			if (SDK_INT >= 23) activity?.window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+		} else {
+			val nSecondaryTextColor = ColorUtils.setAlphaComponent(
+				liveColor.value?.textColor ?: 0, 255
+			)
+			if (SDK_INT >= 23) {
+				activity?.window?.decorView?.systemUiVisibility = when (nSecondaryTextColor) {
+					Color.BLACK -> View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+					Color.WHITE -> 0
+					else -> 0
+				}
+			}
+		}
+
 	}
 	override fun onDestroyView() {
 		super.onDestroyView()
@@ -367,14 +410,29 @@ class PlayerFragment: BaseFragment() {
 			it.shuffleButton.setOnClickListener(null)
 			it.repeatButton.setOnClickListener(null)
 			it.progressSeekBar.setOnSeekBarChangeListener(null)
-			it.viewPager.unregisterOnPageChangeCallback(onPageChangeListener)
+			it.viewPager.removeOnPageChangeListener(onPageChangeListener)
 		}
 		if (SDK_INT >= 23) activity?.window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
 
 	}
 
-	companion object {
-		private const val lastQueue = "X_LAST_QUEUE_X"
+	inner class AlbumArtsAdapter : FragmentStatePagerAdapter(childFragmentManager) {
+
+		var data: Tracklist by Delegates.observable(Tracklist()) { _,_,_ -> notifyDataSetChanged() }
+
+		override fun setPrimaryItem(container: ViewGroup, position: Int, `object`: Any) {
+			super.setPrimaryItem(container, position, `object`)
+
+			if (`object` is AlbumArtFragment)
+				launch { liveColor.postValue(`object`.ambiColor?.await() ?: AmbiColor.NULL) }
+
+		}
+		override fun getItem(position: Int): AlbumArtFragment {
+			return AlbumArtFragment.newInstance(data[position])
+		}
+		override fun getPageWidth(position: Int) = 1f - 6.dp.toFloat()/ width.toFloat()
+		override fun getCount() = data.size
+
 	}
 
 }

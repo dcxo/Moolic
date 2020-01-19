@@ -46,7 +46,7 @@ class HomeNavFragment: BaseFragment() {
 				val newP = Transformations.switchMap<ArrayList<Playlist>, Playlist>(p) {
 					return@switchMap MutableLiveData<Playlist>().apply { value = it[i] }
 				}
-				val f = PlaylistTracksFragment.newInstance(newP)
+				val f = PlaylistTracksFragment.newInstance(newP, mActivity?.liveMiniPlayerVisibility)
 				fragmentManager?.beginTransaction()
 					?.setCustomAnimations(
 						R.anim.slide_up,
@@ -58,7 +58,7 @@ class HomeNavFragment: BaseFragment() {
 					?.commit()
 			}
 			longClick = {playlist, i ->
-				fragmentManager?.let {
+				if (playlist.id >= 0) fragmentManager?.let {
 					PlaylistBottomDialog().apply {
 						item = playlist
 						listPos = i
@@ -80,11 +80,8 @@ class HomeNavFragment: BaseFragment() {
 
 		}
 
-		view.addPlaylist.setOnClickListener {
-
-			createPlaylistDialog(activity ?: view.context).show()
-
-		}
+		view.noContentImage.setOnClickListener { createPlaylistDialog(activity ?: view.context).show() }
+		view.addPlaylist.setOnClickListener { createPlaylistDialog(activity ?: view.context).show() }
 
 	}
 	override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -92,7 +89,10 @@ class HomeNavFragment: BaseFragment() {
 
 		(activity as? UniqueActivity)?.obweiViewModel?.getPlaylist()?.observe(this, Observer {
 
-			(view?.recyclerNav?.adapter as PlaylistsAdapter).updateData(it)
+			view?.noContentView?.visibility = if (it.isNotEmpty()) View.GONE else View.VISIBLE
+			view?.recyclerNav?.visibility = if (it.isNotEmpty()) View.VISIBLE else View.GONE
+
+			if (it.isNotEmpty()) (view?.recyclerNav?.adapter as PlaylistsAdapter).updateData(it)
 
 		})
 

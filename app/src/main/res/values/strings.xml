@@ -50,6 +50,12 @@
 	<string name="shuffle_all" translatable="false">Shuffle All</string>
 	<string name="slide">Slide</string>
 	<string name="permissions_msg">Clikc here to accept the permissions. We need storage permissions only to access music</string>
+	<string name="no_playlists_found">No playlists found</string>
+	<string name="no_songs_found">No songs found</string>
+	<string name="no_albums_found">No albums found</string>
+	<string name="no_artists_found">No artists found</string>
+	<string name="add_folder">Add folder</string>
+	<string name="playlistTip">(You can click here to add one)</string>
 
 	<string-array name="album_art_sources">
 		<item>Download from Last.FM</item>

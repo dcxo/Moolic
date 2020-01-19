@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_height="match_parent"
+	android:layout_width="match_parent">
+
+	<View
+		android:id="@+id/bgHelper"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:layout_marginBottom="0dp"
+		android:background="@color/colorPrimary"
+		app:layout_constraintBottom_toTopOf="@+id/albumTitle"
+		app:layout_constraintLeft_toLeftOf="parent"
+		app:layout_constraintRight_toRightOf="parent"
+		app:layout_constraintTop_toTopOf="parent" />
+
+	<com.google.android.material.card.MaterialCardView
+		android:id="@+id/cardViewHelper"
+		android:layout_width="0dp"
+		android:layout_height="0dp"
+		android:layout_marginTop="8dp"
+		app:cardCornerRadius="8dp"
+		app:cardElevation="8dp"
+		app:layout_constraintDimensionRatio="1"
+		app:layout_constraintBottom_toTopOf="@id/albumTitle"
+		app:layout_constraintTop_toTopOf="parent"
+		app:layout_constraintStart_toStartOf="parent"
+		app:layout_constraintEnd_toEndOf="parent"
+		app:layout_constraintWidth_percent="0.618">
+
+		<ImageView
+			android:id="@+id/albumArt"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			app:srcCompat="@drawable/drawable_error_album_art_album" />
+
+		<ImageView
+			android:id="@+id/editButton"
+			android:layout_height="48dp"
+			android:layout_width="48dp"
+			android:padding="8dp"
+			android:layout_gravity="bottom|end"
+			android:background="#33FFFFFF"
+			android:tint="@color/colorPrimary"
+			app:srcCompat="@drawable/icon_edit" />
+
+	</com.google.android.material.card.MaterialCardView>
+
+	<com.google.android.material.textfield.TextInputLayout
+		android:id="@+id/albumTitle"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:hint="@string/album_title"
+		android:layout_marginTop="16dp"
+		android:layout_marginRight="4dp"
+		android:layout_marginLeft="4dp"
+		app:hintEnabled="true"
+		app:layout_constraintLeft_toLeftOf="parent"
+		app:layout_constraintRight_toRightOf="parent"
+		app:layout_constraintTop_toBottomOf="@+id/cardViewHelper">
+
+		<com.google.android.material.textfield.TextInputEditText
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:maxLines="1"
+			android:scrollHorizontally="true"
+			app:layout_constraintLeft_toLeftOf="parent"
+			app:layout_constraintRight_toRightOf="parent"
+			app:layout_constraintTop_toTopOf="parent" />
+	</com.google.android.material.textfield.TextInputLayout>
+
+	<com.google.android.material.textfield.TextInputLayout
+		android:id="@+id/artistName"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:hint="@string/artist_name"
+		android:layout_margin="4dp"
+		app:hintEnabled="true"
+		app:layout_constraintLeft_toLeftOf="parent"
+		app:layout_constraintRight_toRightOf="parent"
+		app:layout_constraintTop_toBottomOf="@+id/albumTitle">
+
+		<com.google.android.material.textfield.TextInputEditText
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:maxLines="1"
+			android:scrollHorizontally="true"
+			app:layout_constraintLeft_toLeftOf="parent"
+			app:layout_constraintRight_toRightOf="parent"
+			app:layout_constraintTop_toTopOf="parent" />
+	</com.google.android.material.textfield.TextInputLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

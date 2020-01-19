@@ -10,6 +10,7 @@ import ml.dcxo.x.obwei.ui.dialogs.bottomDialogs.ArtistBottomDialog
 import ml.dcxo.x.obwei.utils.MarginDecor
 import ml.dcxo.x.obwei.utils.artistBottomDialogFragmentTag
 import ml.dcxo.x.obwei.viewModel.Artist
+import ml.dcxo.x.obwei.R
 
 /**
  * Created by David on 02/11/2018 for XOXO
@@ -17,7 +18,6 @@ import ml.dcxo.x.obwei.viewModel.Artist
 class ArtistsNavFragment: BaseNavFragment<Artist, ArtistsAdapter>() {
 
 	override val decor: RecyclerView.ItemDecoration? = MarginDecor()
-
 	override val click: ((Artist, Int) -> Unit)? = {artist, i ->
 		mActivity?.hideKeyboard()
 
@@ -36,6 +36,9 @@ class ArtistsNavFragment: BaseNavFragment<Artist, ArtistsAdapter>() {
 				.show(it, artistBottomDialogFragmentTag)
 		}
 	}
+	override val noContentMessage: Int = R.string.no_artists_found
+	override val noContentImage: Int = R.drawable.icon_person
+
 	override fun filterData(model: Artist, query: String): Boolean = model.name.contains(query, true)
 	override fun getToolbarTitle(): String = "${getLiveData().value?.size ?: "No"} Artists"
 	override fun getLiveData(): LiveData<ArrayList<Artist>> =

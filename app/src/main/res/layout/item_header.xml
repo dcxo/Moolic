@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="wrap_content"
+	android:background="@drawable/ripple_transparent">
+
+	<TextView
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="@string/shuffle_all"
+		android:textSize="28sp"
+		android:fontFamily="@font/oxygen_bold"
+		android:padding="12dp"
+		android:fontFeatureSettings="smcp"
+		android:gravity="center"
+		android:textColor="@color/colorAccent" />
+
+	<View
+		android:layout_width="match_parent"
+		android:layout_height="1dp"
+		android:background="@color/colorPrimaryDark"
+		android:layout_gravity="bottom"/>
+
+</FrameLayout>

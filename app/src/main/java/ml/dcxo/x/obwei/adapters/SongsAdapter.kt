@@ -1,21 +1,15 @@
 package ml.dcxo.x.obwei.adapters
 
-import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.*
+import com.bumptech.glide.GenericTransitionOptions
 import com.bumptech.glide.load.resource.bitmap.*
-import com.bumptech.glide.request.target.BitmapImageViewTarget
-import com.bumptech.glide.request.transition.Transition
 import kotlinx.android.synthetic.main.item_song.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import ml.dcxo.x.obwei.AmbiColor
 import ml.dcxo.x.obwei.R
 import ml.dcxo.x.obwei.base.BaseAdapter
 import ml.dcxo.x.obwei.base.BaseViewHolder
-import ml.dcxo.x.obwei.utils.GlideApp
-import ml.dcxo.x.obwei.utils.dp
+import ml.dcxo.x.obwei.AmbiColor
+import ml.dcxo.x.obwei.utils.*
 import ml.dcxo.x.obwei.viewModel.Song
 
 /**
@@ -56,57 +50,32 @@ class SongsAdapter: BaseAdapter<Song, SongsAdapter.SongViewHolder>() {
 
 			song = i
 
-			songTitle.text = i.title
+			itemSongTitle.text = i.title
 			artistName.text = i.artistName
 
-			GlideApp.with(thumbnailAlbumArt).asBitmap()
+			GlideApp.with(thumbnailAlbumArt).asAmbitmap()
 				.load(i.getAlbumArtURI)
 				.error(R.drawable.drawable_error_album_art_song)
 				.transforms(RoundedCorners(4.dp), CenterCrop())
-				.transition(BitmapTransitionOptions.withCrossFade(440))
-				.into(object: BitmapImageViewTarget(thumbnailAlbumArt) {
-					override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-						super.onResourceReady(resource, transition)
-
-						launch(Dispatchers.Default) { ambiColor = AmbiColor(resource) }
-
-					}
-
-					override fun onLoadFailed(errorDrawable: Drawable?) {
-						super.onLoadFailed(errorDrawable)
-
-						ambiColor = AmbiColor.NULL
-
-					}
+				.transition(GenericTransitionOptions<Ambitmap>().transition(android.R.anim.fade_in))
+				.into(MukolorTarget(thumbnailAlbumArt) {
+					ambiColor = it
 				})
 
 		}
 		override fun changeViewWithPayloads(changes: Bundle) {
 
 			var s = changes.getString(PayloadsKeys.songTitleKey)
-			if (s != null) songTitle.text = s
+			if (s != null) itemSongTitle.text = s
 			s = changes.getString(PayloadsKeys.artistNameKey)
 			if (s != null) artistName.text = s
 
-			GlideApp.with(thumbnailAlbumArt).asBitmap()
+			GlideApp.with(thumbnailAlbumArt).asAmbitmap()
 				.load(data[adapterPosition].getAlbumArtURI)
 				.error(R.drawable.drawable_error_album_art_song)
 				.transforms(RoundedCorners(4.dp), CenterCrop())
-				.transition(BitmapTransitionOptions.withCrossFade(440))
-				.into(object: BitmapImageViewTarget(thumbnailAlbumArt) {
-					override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-						super.onResourceReady(resource, transition)
-
-						launch(Dispatchers.Default) { ambiColor = AmbiColor(resource) }
-
-					}
-
-					override fun onLoadFailed(errorDrawable: Drawable?) {
-						super.onLoadFailed(errorDrawable)
-
-						ambiColor = AmbiColor.NULL
-
-					}
+				.into(MukolorTarget(thumbnailAlbumArt) {
+					ambiColor = it
 				})
 
 

@@ -1,26 +1,19 @@
 package ml.dcxo.x.obwei.adapters
 
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.TransitionDrawable
 import android.os.Build
 import android.os.Bundle
 import android.view.*
+import com.bumptech.glide.GenericTransitionOptions
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.load.resource.bitmap.BitmapTransitionOptions
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.RequestOptions
-import com.bumptech.glide.request.target.Target
 import kotlinx.android.synthetic.main.item_album.*
-import kotlinx.coroutines.*
-import ml.dcxo.x.obwei.AmbiColor
+import kotlinx.android.synthetic.main.item_album.view.*
 import ml.dcxo.x.obwei.R
 import ml.dcxo.x.obwei.base.BaseAdapter
 import ml.dcxo.x.obwei.base.BaseViewHolder
-import ml.dcxo.x.obwei.utils.generateAlphaGradient
+import ml.dcxo.x.obwei.AmbiColor
+import ml.dcxo.x.obwei.utils.*
 import ml.dcxo.x.obwei.viewModel.Album
 
 /**
@@ -58,49 +51,25 @@ class AlbumsAdapter: BaseAdapter<Album, AlbumsAdapter.AlbumViewHolder>() {
 			albumTitle.text = i.title
 			artistName.text = i.artistName
 
-			Glide.with(thumbnailAlbumArt).asBitmap().load(i.getAlbumArtURI)
-				.error(Glide.with(thumbnailAlbumArt).asBitmap().load(R.drawable.drawable_error_album_art_album))
-				.apply(
-					RequestOptions().placeholder(R.drawable.drawable_error_album_art_album)
-						.centerCrop().diskCacheStrategy(DiskCacheStrategy.NONE)
-				)
-				.transition(BitmapTransitionOptions.withCrossFade(440))
-				.listener(object: RequestListener<Bitmap> {
-					override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Bitmap>?, isFirstResource: Boolean): Boolean = false
+			GlideApp.with(thumbnailAlbumArt)
+				.asAmbitmap()
+				.load(i.getAlbumArtURI)
+				.error(R.drawable.drawable_error_album_art_album)
+				.centerCrop()
+				.into(object: MukolorTarget(thumbnailAlbumArt) {
+					override fun onColorsReady(ambiColor: AmbiColor) {
 
-					override fun onResourceReady(resource: Bitmap?, model: Any?, target: Target<Bitmap>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
-
-						launch {
-							if (resource != null) {
-								val ambiColor =
-									withContext(Dispatchers.Default) { AmbiColor(resource) }
-
-								thumbnailAlbumArt.setImageBitmap(resource)
-								albumTitle.setTextColor(ambiColor.primaryTextColor)
-								artistName.setTextColor(ambiColor.primaryTextColor)
-								if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-									val gradient1 = generateAlphaGradient(Color.DKGRAY)
-									val gradient = generateAlphaGradient(ambiColor.primaryColor)
-									val td = TransitionDrawable(arrayOf(gradient1, gradient))
-									thumbnailAlbumArt.foreground = td.apply { startTransition(440) }
-								}
-
-							} else {
-								thumbnailAlbumArt.setImageResource(R.drawable.drawable_error_album_art_album)
-								albumTitle.setTextColor(Color.LTGRAY)
-								artistName.setTextColor(Color.LTGRAY)
-								if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-									thumbnailAlbumArt.foreground =
-											generateAlphaGradient(Color.DKGRAY)
-							}
+						albumTitle.setTextColor(ambiColor.textColor)
+						artistName.setTextColor(ambiColor.textColor)
+						if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+							val gradient1 = generateAlphaGradient(Color.DKGRAY)
+							val gradient = generateAlphaGradient(ambiColor.color)
+							val td = TransitionDrawable(arrayOf(gradient1, gradient))
+							view.foreground = td.apply { startTransition(440) }
 						}
 
-						return false
 					}
-
 				})
-				.into(thumbnailAlbumArt)
-
 		}
 		override fun changeViewWithPayloads(changes: Bundle) {
 
@@ -109,45 +78,22 @@ class AlbumsAdapter: BaseAdapter<Album, AlbumsAdapter.AlbumViewHolder>() {
 			s = changes.getString(artistNameKey)
 			if (s != null) artistName.text = s
 
-			Glide.with(thumbnailAlbumArt).asBitmap().load(data[adapterPosition].getAlbumArtURI)
-				.error(Glide.with(thumbnailAlbumArt).asBitmap().load(R.drawable.drawable_error_album_art_album))
-				.apply( RequestOptions().placeholder(R.drawable.drawable_error_album_art_album).centerCrop() )
-				.transition(BitmapTransitionOptions.withCrossFade(440))
-				.listener(object: RequestListener<Bitmap> {
-					override fun onLoadFailed(e: GlideException?, model: Any?, target: Target<Bitmap>?, isFirstResource: Boolean): Boolean = false
+			GlideApp.with(thumbnailAlbumArt)
+				.asAmbitmap()
+				.load(data[adapterPosition].getAlbumArtURI)
+				.error(R.drawable.drawable_error_album_art_album)
+				.centerCrop()
+				.transition(GenericTransitionOptions<Ambitmap>().transition(android.R.anim.fade_in))
+				.into(MukolorTarget(thumbnailAlbumArt) {
 
-					override fun onResourceReady(resource: Bitmap?, model: Any?, target: Target<Bitmap>?, dataSource: DataSource?, isFirstResource: Boolean): Boolean {
+					albumTitle.setTextColor(it.textColor)
+					artistName.setTextColor(it.textColor)
 
-						launch {
-							if (resource != null) {
-								val ambiColor =
-									withContext(Dispatchers.Default) { AmbiColor(resource) }
-
-								thumbnailAlbumArt.setImageBitmap(resource)
-								albumTitle.setTextColor(ambiColor.primaryTextColor)
-								artistName.setTextColor(ambiColor.primaryTextColor)
-								if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-									val gradient1 = generateAlphaGradient(Color.DKGRAY)
-									val gradient = generateAlphaGradient(ambiColor.primaryColor)
-									val td = TransitionDrawable(arrayOf(gradient1, gradient))
-									thumbnailAlbumArt.foreground = td.apply { startTransition(440) }
-								}
-
-							} else {
-								thumbnailAlbumArt.setImageResource(R.drawable.drawable_error_album_art_album)
-								albumTitle.setTextColor(Color.LTGRAY)
-								artistName.setTextColor(Color.LTGRAY)
-								if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-									thumbnailAlbumArt.foreground =
-											generateAlphaGradient(Color.DKGRAY)
-							}
-						}
-
-						return false
-					}
+					val gradient = generateAlphaGradient(it.color)
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) view.foreground = gradient
+					else itemView.bgForeground.background = gradient
 
 				})
-				.into(thumbnailAlbumArt)
 
 		}
 		override fun recycle() {

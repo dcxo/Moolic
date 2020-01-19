@@ -75,7 +75,7 @@ class SongsNavFragment: BaseNavFragment<Song, SongsAdapter>() {
 			val maxX = Math.min(dX, 2f*x+y+4.dp)
 			val clipRect = RectF(0f, view.top.toFloat(), maxX, view.bottom.toFloat())
 			c.clipRect(clipRect)
-			c.drawColor(viewHolder.ambiColor.primaryColor)
+			c.drawColor(viewHolder.ambiColor.color)
 
 			val rect = RectF(maxX - 4.dp, view.top.toFloat(), maxX + 4.dp, view.bottom.toFloat())
 			val paint = Paint().apply {
@@ -89,7 +89,7 @@ class SongsNavFragment: BaseNavFragment<Song, SongsAdapter>() {
 
 			val drawable = resources.getDrawable(R.drawable.icon_skip_next, null)
 			val drawableRect = Rect(x, x+view.top, x+y, x+view.top+y)
-			drawable.setTint(viewHolder.ambiColor.primaryTextColor)
+			drawable.setTint(viewHolder.ambiColor.textColor)
 			drawable.bounds = drawableRect
 			drawable.draw(c)
 

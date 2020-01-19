@@ -1,5 +1,6 @@
 package ml.dcxo.x.obwei.adapters
 
+import android.graphics.Color
 import android.view.*
 import kotlinx.android.synthetic.main.item_queue_song.*
 import ml.dcxo.x.obwei.R
@@ -26,7 +27,10 @@ class AlbumTracksAdapter: BaseAdapter<Song, AlbumTracksAdapter.AlbumTrackVH>() {
 		override fun bind(i: Song, position: Int) {
 
 			positionInQueue.text = "${i.track%1000}"
-			songTitle.text = i.title
+			queueSongTitle.text = i.title
+
+			positionInQueue.setTextColor(Color.GRAY)
+			queueSongTitle.setTextColor(Color.GRAY)
 
 		}
 		override fun recycle() {

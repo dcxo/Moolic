@@ -2,7 +2,10 @@ package ml.dcxo.x.obwei.adapters
 
 import android.graphics.Color
 import android.view.*
+import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.toColorInt
+import androidx.core.view.MotionEventCompat
+import androidx.recyclerview.widget.ItemTouchHelper
 import com.google.android.material.shape.*
 import kotlinx.android.synthetic.main.item_queue_song.*
 import ml.dcxo.x.obwei.R
@@ -15,23 +18,8 @@ import kotlin.properties.Delegates
 /**
  * Created by David on 20/11/2018 for XOXO
  */
-class QueueAdapter : BaseAdapter<Song, QueueAdapter.QueueVH>() {
+class QueueAdapter(val startDragFunc: (QueueVH)->Unit) : BaseAdapter<Song, QueueAdapter.QueueVH>() {
 
-	val bg = { color: Int ->
-
-		val path = ShapePathModel().apply {
-			val rcTreatment = RoundedCornerTreatment(4.dp.toFloat())
-			topRightCorner = rcTreatment
-			topLeftCorner = rcTreatment
-			bottomRightCorner = rcTreatment
-			bottomLeftCorner = rcTreatment
-		}
-		MaterialShapeDrawable(path).apply {
-			setTint(color)
-			shadowElevation = 0
-		}
-
-	}
 	var currentPosition by Delegates.observable(0) {_, _, _ -> notifyDataSetChanged() }
 
 	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): QueueVH =
@@ -41,25 +29,34 @@ class QueueAdapter : BaseAdapter<Song, QueueAdapter.QueueVH>() {
 
 	inner class QueueVH(itemView: View): BaseViewHolder<Song>(itemView) {
 
-		var current = false
-
 		override fun bind(i: Song, position: Int) {
 
-
 			val a = (position - currentPosition)
-			val c = if (a == 0) {
-				current = true
-				itemView.background = bg("#AAAAAA".toColorInt())
-				Color.DKGRAY
-			} else {
-				current = false
-				itemView.background = bg(Color.TRANSPARENT)
-				Color.parseColor("#AAAAAA")
-			}
-			positionInQueue.text = a.toString()
+			val c = if (a == 0) Color.DKGRAY else "#AAAAAA".toColorInt()
+
+			itemView.background =
+				if (a == 0)
+					MaterialShapeDrawable(ShapePathModel().apply {
+						val rcTreatment = RoundedCornerTreatment(4.dp.toFloat())
+						topRightCorner = rcTreatment
+						topLeftCorner = rcTreatment
+						bottomRightCorner = rcTreatment
+						bottomLeftCorner = rcTreatment
+					}).apply {
+						setTint("#AAAAAA".toColorInt())
+						shadowElevation = 0
+					}
+				else null
+
+			positionInQueue.text = "$a"
 			positionInQueue.setTextColor(c)
-			songTitle.text = i.title
-			songTitle.setTextColor(c)
+			positionInQueue.setOnTouchListener { _, event ->
+				if (event.action == MotionEvent.ACTION_DOWN) startDragFunc(this)
+				return@setOnTouchListener false
+			}
+
+			queueSongTitle.text = i.title
+			queueSongTitle.setTextColor(c)
 
 		}
 		override fun recycle() {}

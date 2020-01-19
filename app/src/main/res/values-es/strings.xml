@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="songs">Canciones</string>
+	<string name="home">Principal</string>
+	<string name="albums">Álbumes</string>
+	<string name="artists">Artistas</string>
+	<string name="addToQueue">Añadir a la Cola</string>
+	<string name="addToPlaylist">Añadir a una Playlist</string>
+	<string name="goToAlbum">Ir al Álbum</string>
+	<string name="goToArtist">Ir al Artista</string>
+	<string name="editMetadata">Editar Metadatos</string>
+	<string name="addToBlacklist">Añadir a la lista negra</string>
+	<string name="removeFromDisk">Eliminar del dispositivo</string>
+	<string name="remove_from_disk">¿Eliminar del dispositivo?</string>
+	<string name="add_to_blacklist">¿Añadir a la Lista Negra?</string>
+	<string name="new_playlist">Nueva Playlist…</string>
+	<string name="create_playlist">Crear Playlist</string>
+	<string name="edit_blacklist">Editar Lista Negra</string>
+	<string name="sure_to_remove_to_blacklist">¿Eliminar de la Lista Negra?</string>
+	<string name="recently_added">Añadidas Recientemente</string>
+	<string name="queue">Lista de Reproducción</string>
+	<string name="song_title">Título de la Canción</string>
+	<string name="album_title">Título del Álbum</string>
+	<string name="artist_name">Nombre del/la Artista</string>
+	<string name="year">Año</string>
+	<string name="track_number">Pista</string>
+	<string name="trackHelper">Ej: 3004 para el CD3, pista 4</string>
+	<string name="not_implemented">No implementado todavía</string>
+	<string name="accept">Aceptar</string>
+	<string name="cancel">Cancelar</string>
+	<string-array name="album_art_sources">
+		<item>Descargar de Last.FM</item>
+		<item>Eligir del almacenamiento</item>
+		<item>Eliminar carátula</item>
+	</string-array>
+	<string name="delete_queue">Eliminar reproducción</string>
+	<string name="eq">Ecualizador</string>
+	<string name="save_queue">Guardar cola</string>
+	<string name="share">Compartir</string>
+	<string name="yes">Sí</string>
+	<string name="no">No</string>
+	<string name="add">Añadir</string>
+	<string name="search">Buscar</string>
+	<string name="slide">Desliza</string>
+	<string name="permissions_msg">Haga click aquí para aceptar los permisos. Solo son necesarios los permisos de almacenamiento para acceder a la música</string>
+	<string name="no_playlists_found">No playlists halladas</string>
+	<string name="no_songs_found">No canciones halladas</string>
+	<string name="no_artists_found">No artistas hallados/as</string>
+	<string name="no_albums_found">No álbumes hallados</string>
+	<string name="add_folder">Añadir carpeta</string>
+	<string name="playlistTip">(Puedes añadir una clickando aquí)</string>
+
+</resources>

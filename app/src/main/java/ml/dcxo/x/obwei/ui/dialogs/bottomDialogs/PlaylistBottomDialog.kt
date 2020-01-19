@@ -27,7 +27,7 @@ class PlaylistBottomDialog: BottomSheetDialogFragment() {
 
 		val v = inflater.inflate(R.layout.dialog_bottom_song, container, false)
 
-		v.songTitle.text = item.name
+		v.dbSongTitle.text = item.name
 		v.addToBlacklistOption.visibility = View.GONE
 		v.addToPlaylistOption.visibility = View.GONE
 		v.goToAlbumOption.visibility = View.GONE

@@ -29,7 +29,7 @@ class AddToBlacklistDialog: DialogFragment() {
 				addToBlacklist(activity, args)
 				activity?.contentResolver?.notifyChange(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null)
 			}
-		if (args.size <= 1) alertDialog.setNeutralButton("Add folder") { _, _ ->
+		if (args.size <= 1) alertDialog.setNeutralButton(R.string.add_folder) { _, _ ->
 			val uri = "${File(args[0]).parent}/%"
 			addToBlacklist(activity, listOf(uri))
 			activity?.contentResolver?.notifyChange(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null)

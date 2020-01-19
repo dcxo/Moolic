@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.*
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import ml.dcxo.x.obwei.R
 import ml.dcxo.x.obwei.adapters.AlbumsAdapter
 import ml.dcxo.x.obwei.base.BaseNavFragment
 import ml.dcxo.x.obwei.ui.UniqueActivity
@@ -37,6 +38,8 @@ class AlbumsNavFragment: BaseNavFragment<Album, AlbumsAdapter>() {
 		}
 	}
 	override val decor: RecyclerView.ItemDecoration? = MarginDecor()
+	override val noContentMessage: Int = R.string.no_albums_found
+	override val noContentImage: Int = R.drawable.icon_album
 
 	override fun getLiveData(): LiveData<ArrayList<Album>> =
 		mActivity?.obweiViewModel?.getAlbums() ?: MutableLiveData()

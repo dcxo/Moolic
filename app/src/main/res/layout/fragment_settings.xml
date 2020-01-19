@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:background="#fff">
+
+	<FrameLayout
+		android:id="@+id/frameLayout2"
+		android:layout_width="match_parent"
+		android:layout_height="?actionBarSize"
+		android:background="@color/blue_500"
+		app:layout_constraintBottom_toTopOf="@+id/settingsBlacklistOption"
+		app:layout_constraintTop_toTopOf="parent">
+
+		<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="center"
+			android:textAppearance="@style/TextAppearance.Obwei.Headline2"
+			android:textColor="@color/blue_50"
+			android:text="Settings"/>
+
+	</FrameLayout>
+
+	<TextView
+		android:id="@+id/settingsBlacklistOption"
+		android:layout_width="match_parent"
+		android:layout_height="0dp"
+		android:drawableStart="@drawable/icon_warning"
+		android:drawablePadding="12dp"
+		android:drawableTint="?android:textColorSecondary"
+		android:padding="8dp"
+		android:text="Blacklist"
+		android:textAppearance="@style/TextAppearance.Obwei.Option"
+		app:layout_constraintTop_toBottomOf="@+id/frameLayout2" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

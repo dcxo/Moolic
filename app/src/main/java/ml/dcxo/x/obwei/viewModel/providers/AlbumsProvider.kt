@@ -21,22 +21,18 @@ object AlbumsProvider {
 
 		val albums = arrayListOf<Album>()
 
-		val l = measureTimeMillis {
-			SongsProvider.getCursor(context, sortOrder).use {
+		SongsProvider.getCursor(context, sortOrder).use {
 
-				if (it.count < 1) return@use
-				it.moveToFirst()
+			if (it.count < 1) return@use
+			it.moveToFirst()
 
-				val sqnc = sequence { do yield(it) while (it.moveToNext()) }
-				for (crs in sqnc) {
-					val song = SongsProvider.createSong(crs)
-					createOrGetAlbum(song, albums).trackList.add(song)
-				}
-
+			val sqnc = sequence { do yield(it) while (it.moveToNext()) }
+			for (crs in sqnc) {
+				val song = SongsProvider.createSong(crs)
+				createOrGetAlbum(song, albums).trackList.add(song)
 			}
-		}
 
-		Log.v("${this::class.java.simpleName} duration", "$l ms")
+		}
 
 		return albums
 

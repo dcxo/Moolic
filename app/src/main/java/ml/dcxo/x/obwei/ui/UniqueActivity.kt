@@ -6,7 +6,9 @@ import android.app.Service
 import android.content.*
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.graphics.PorterDuff
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.IBinder
 import android.provider.MediaStore
@@ -22,12 +24,15 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.*
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.*
+import com.bumptech.glide.request.transition.Transition
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.shape.*
 import kotlinx.android.synthetic.main.activity_unique.*
 import kotlinx.coroutines.*
-import ml.dcxo.x.obwei.AmbiColor
+import ml.dcxo.x.obwei.*
 import ml.dcxo.x.obwei.R
+import ml.dcxo.x.obwei.AmbiColor
 import ml.dcxo.x.obwei.service.*
 import ml.dcxo.x.obwei.ui.fragments.PermissionsFragment
 import ml.dcxo.x.obwei.ui.fragments.PlayerFragment
@@ -72,7 +77,24 @@ class UniqueActivity : AppCompatActivity(), BottomNavigationView.OnNavigationIte
 
 		if (it.playbackState != cServiceState?.playbackState) setPlaybackState(it.playbackState)
 		songTitle.text = it.song.title
-		setColors(it.ambiColor)
+
+		if (it.playbackState.state != PlaybackStateCompat.STATE_NONE) {
+			GlideApp.with(this).asAmbitmap().load(it.song.getAlbumArtURI)
+				.into(object : CustomViewTarget<View, Ambitmap>(root) {
+					override fun onResourceReady(resource: Ambitmap, transition: Transition<in Ambitmap>?) {
+
+						launch { setColors(resource.ambiColor.await()) }
+
+					}
+
+					override fun onResourceCleared(placeholder: Drawable?) {}
+					override fun onLoadFailed(errorDrawable: Drawable?) {
+						setColors(AmbiColor.NULL)
+					}
+				})
+		} else {
+			setColors(AmbiColor.NULL)
+		}
 
 		cServiceState = it
 
@@ -94,15 +116,12 @@ class UniqueActivity : AppCompatActivity(), BottomNavigationView.OnNavigationIte
 			serviceState?.observe(this@UniqueActivity, serviceStateObserver)
 
 		}
-
 		override fun onServiceDisconnected(name: ComponentName?) {
 			uiInteractions = null
 
 			serviceState = null
 			queue = null
 			playerPosition = null
-
-			closePlayer(true)
 
 		}
 	}
@@ -210,19 +229,19 @@ class UniqueActivity : AppCompatActivity(), BottomNavigationView.OnNavigationIte
 			topRightCorner = cornerTreatment
 		}
 		val mDrawable = MaterialShapeDrawable(path).apply {
-			setTint(ambiColor.primaryColor)
+			setTint(if (ambiColor != AmbiColor.NULL) ambiColor.color else Color.WHITE)
 			shadowElevation = 8.dp
 		}
 		miniPlayer.background = mDrawable
 
-		songTitle.setTextColor(ambiColor.primaryTextColor)
+		songTitle.setTextColor(ambiColor.textColor)
 
 		playPauseButton.clearColorFilter()
-		playPauseButton.setColorFilter(ambiColor.primaryTextColor, PorterDuff.Mode.SRC_IN)
+		playPauseButton.setColorFilter(ambiColor.textColor, PorterDuff.Mode.SRC_IN)
 
-		navMenu.setBackgroundColor(ambiColor.primaryColor)
+		navMenu.setBackgroundColor(if (ambiColor != AmbiColor.NULL) ambiColor.color else Color.WHITE)
 
-		val cList = if (ambiColor != AmbiColor.NULL)
+		val cList = if (ambiColor == AmbiColor.NULL)
 			ContextCompat.getColorStateList(this, R.color.selector_items_bottom_nav)
 		else ColorStateList(
 			arrayOf(
@@ -230,8 +249,8 @@ class UniqueActivity : AppCompatActivity(), BottomNavigationView.OnNavigationIte
 				intArrayOf(-android.R.attr.state_checked)
 			),
 			intArrayOf(
-				ColorUtils.setAlphaComponent(ambiColor.primaryTextColor, 255),
-				ColorUtils.setAlphaComponent(ambiColor.primaryTextColor, 255/4)
+				ColorUtils.setAlphaComponent(ambiColor.textColor, 255),
+				ColorUtils.setAlphaComponent(ambiColor.textColor, 255/3)
 			)
 		)
 		navMenu.itemIconTintList = cList
@@ -330,16 +349,21 @@ class UniqueActivity : AppCompatActivity(), BottomNavigationView.OnNavigationIte
 		else super.onBackPressed()
 
 	}
-	override fun onDestroy() {
-		super.onDestroy()
+	override fun onStop() {
+		super.onStop()
 
-		launch(Dispatchers.Default) { Glide.get(this@UniqueActivity).clearDiskCache() }
+		launch(DispatcherAsyncTask) { Glide.get(this@UniqueActivity).clearDiskCache() }
 
 		Glide.get(this).clearMemory()
 		System.gc()
 
 		unbindService(serviceConnection)
 
+	}
+	override fun onRestart() {
+		super.onRestart()
+		val serviceIntent = Intent(this, MusicService::class.java)
+		bindService(serviceIntent, serviceConnection, Service.BIND_AUTO_CREATE)
 	}
 	override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
 
@@ -440,7 +464,7 @@ class UniqueActivity : AppCompatActivity(), BottomNavigationView.OnNavigationIte
 			transaction.remove(fragment)
 		else
 			transaction.hide(fragment)
-		transaction.commit()
+		transaction.commitAllowingStateLoss()
 
 		return true
 

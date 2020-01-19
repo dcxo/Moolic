@@ -10,6 +10,7 @@ import android.os.Build.VERSION.SDK_INT
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.support.v4.media.session.PlaybackStateCompat.State
 import android.util.LruCache
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
@@ -47,9 +48,6 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 		if (this::notification.isInitialized) notification.update()
 		liveServiceState.postValue( ServiceState(song = newSong) )
 	}
-	var cAmbiColor by Delegates.observable(AmbiColor.NULL) {_, _, newAmbiColor ->
-		liveServiceState.postValue( ServiceState(ambiColor = newAmbiColor) )
-	}
 	var cPosition by Delegates.observable(-1) {_, _, newPosition ->
 		liveServiceState.postValue( ServiceState(position = newPosition) )
 		launch { db.queueDAO().updateQueuePosition(newPosition) }
@@ -73,7 +71,7 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 
 		}
 
-		liveQueue.postValue(queue)
+		qQueue = queue
 		liveServiceState.postValue( ServiceState(shuffleMode = newShuffleMode) )
 		Settings[this].shuffleMode = newShuffleMode
 	}
@@ -81,14 +79,14 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 		liveServiceState.postValue( ServiceState(repeatMode = newRepeatMode) )
 		Settings[this].repeatMode = newRepeatMode
 	}
-	var cPlaybackStateCompat: PlaybackStateCompat by Delegates.observable( PlaybackStateCompat.Builder().build() ) { _, _, newPlaybackState ->
+	var cPlaybackStateCompat by Delegates.observable( PlaybackStateCompat.Builder().build() ) { _, _, newPlaybackState ->
 		mSession.setPlaybackState(newPlaybackState)
 		if (this::notification.isInitialized) notification.update()
 		liveServiceState.postValue( ServiceState(playbackState = newPlaybackState) )
 	}
 	/* Queue vars */
 	val liveQueue = MutableLiveData<Tracklist>()
-	val qSortedQueue = arrayListOf<Song>()
+	var qSortedQueue = arrayListOf<Song>()
 	var qQueue by Delegates.observable(arrayListOf<Song>()) {_, _, newQueue ->
 		saveQueue()
 		liveQueue.postValue(newQueue)
@@ -101,7 +99,11 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 	private var isQueueInitializedFromCreate = false
 
 	private val mBinder = MusicServiceBinder()
-	private val db by lazy { Room.databaseBuilder(applicationContext, QueueDB::class.java, "queue-db").build() }
+	private val db by lazy {
+		Room
+			.databaseBuilder(applicationContext, QueueDB::class.java, "queue-db2")
+			.build()
+	}
 	private val preparedListener = MediaPlayer.OnPreparedListener {
 
 		if (cPlaybackStateCompat.state == PlaybackStateCompat.STATE_PLAYING) it.play()
@@ -111,7 +113,7 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 	private val noisy = object : BroadcastReceiver() {
 		override fun onReceive(context: Context?, intent: Intent?) {
 
-			player.pause()
+			player.obweiPause()
 
 		}
 	}
@@ -120,6 +122,7 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 		override fun onPause() = player.obweiPause()
 		override fun onSkipToPrevious() = player.skipToPrevious(true)
 		override fun onSkipToNext() = player.skipToNext(true)
+
 	}
 	private val handler = Handler()
 	private val mActions = {
@@ -154,18 +157,18 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 		}
 
 	}
-	private val audioAttributes = AudioAttributes.Builder()
-		.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-		.setUsage(AudioAttributes.USAGE_MEDIA)
-		.build()
-
+	private val audioAttributes = {
+		AudioAttributes.Builder()
+			.setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+			.setUsage(AudioAttributes.USAGE_MEDIA)
+			.build()
+	}()
 	private val audioFocusRequest = if (SDK_INT >= Build.VERSION_CODES.O) {
 		AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
 			.setOnAudioFocusChangeListener(audioFocusChangeListener)
 			.setAudioAttributes(audioAttributes)
 			.build()
 	} else null
-
 
 	private fun fetchMetadataAndAmbiColor() = launch {
 
@@ -181,27 +184,27 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 
 			var iStream: InputStream? = null
 
-			try {
+			val b = try {
 
 				iStream = contentResolver.openInputStream(cSong.getAlbumArtURI.toUri())
 				val b = BitmapFactory.decodeStream(iStream)
 
-				cAmbiColor = ambiColorCache[cSong.albumId] ?: AmbiColor(b)
-
-				mediaMetadataCompat.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, b)
-
+				b
 
 			} catch (e: FileNotFoundException) {
-				cAmbiColor = AmbiColor.NULL
+				null
 			}
 			iStream?.close()
+
+			notification.bitmap = b
+			notification.update()
+			mediaMetadataCompat.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, b)
 
 			mSession.setMetadata(mediaMetadataCompat.build())
 
 		}
 
 	}
-
 	private fun getAudioFocus(): Int {
 
 		return if (SDK_INT >= Build.VERSION_CODES.O)
@@ -210,10 +213,7 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 			audioManager.requestAudioFocus(audioFocusChangeListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
 
 	}
-	private fun playbackState(
-		@PlaybackStateCompat.State state: Int,
-		position: Long = PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN
-	): PlaybackStateCompat {
+	private fun playbackState(@State state: Int, position: Long = -1L): PlaybackStateCompat {
 		return PlaybackStateCompat.Builder()
 			.setState(state, position, 1f)
 			.setActions(mActions).build()
@@ -222,16 +222,18 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 		when (cPlaybackStateCompat.state) {
 			PlaybackStateCompat.STATE_PLAYING -> player.obweiPause()
 			PlaybackStateCompat.STATE_PAUSED  -> player.play()
-			else                              -> throw IllegalStateException()
 		}
 	}
 	private fun initQueue(queue: Queue) {
 
-		if (queue.queue.isNotEmpty()) {
+		if (queue.queue.isNotEmpty() || (queue.queue.size == 1 && queue.queue[0] == Song.NULL)) {
 			qQueue = queue.queue
+			qSortedQueue = queue.sortedQueue
 			cPosition = queue.queuePosition
 
-			cSong = qQueue[cPosition]
+			cSong =
+				try { qQueue[if (cPosition >= 0) cPosition else 0] }
+				catch (e: IndexOutOfBoundsException) { Song.NULL }
 
 			player.reset()
 			try {
@@ -248,6 +250,7 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 
 		val queue = Queue(
 			queue = qQueue,
+			sortedQueue = qSortedQueue,
 			queuePosition = cPosition,
 			songDurationPosition = 0
 		)
@@ -307,7 +310,6 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 	}
 	override fun onBind(intent: Intent?): IBinder? = mBinder
 	override fun onUnbind(intent: Intent?): Boolean {
-		servicePetitions?.closePlayer(true)
 		servicePetitions = null
 		return super.onUnbind(intent)
 	}
@@ -318,8 +320,10 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 		player.stop()
 		player.release()
 
-		if (SDK_INT >= Build.VERSION_CODES.O) audioManager.abandonAudioFocusRequest(audioFocusRequest)
-		else audioManager.abandonAudioFocus(audioFocusChangeListener)
+		if (SDK_INT >= Build.VERSION_CODES.O)
+			audioManager.abandonAudioFocusRequest(audioFocusRequest)
+		else
+			audioManager.abandonAudioFocus(audioFocusChangeListener)
 
 		mSession.setCallback(null)
 		mSession.isActive = false
@@ -417,7 +421,6 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 	override fun onSeekBarProgressChange(int: Int) {
 		player.seekTo(int)
 	}
-
 	override fun onRemoveFromQueue(position: Int) {
 
 		if (position == cPosition) {
@@ -436,7 +439,7 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 		cPosition = -1
 		cSong = Song.NULL
 		qQueue = arrayListOf()
-		cAmbiColor = AmbiColor.NULL
+		qSortedQueue = arrayListOf()
 		cPlaybackStateCompat = playbackState(PlaybackStateCompat.STATE_NONE)
 		notification.stop()
 		servicePetitions?.closePlayer(true)
@@ -533,7 +536,6 @@ class MusicService: Service(), UIInteractions, PlaybackManager, CoroutineScope {
 	}
 	inner class ServiceState(
 		var song: Song = this@MusicService.cSong,
-		var ambiColor: AmbiColor = this@MusicService.cAmbiColor,
 		var position: Int = this@MusicService.cPosition,
 		var shuffleMode: Boolean = this@MusicService.cShuffleMode,
 		var repeatMode: Int = this@MusicService.cRepeatMode,

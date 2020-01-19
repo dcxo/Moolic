@@ -12,6 +12,7 @@ import ml.dcxo.x.obwei.viewModel.Song
 data class Queue(
 	@PrimaryKey var primaryKey: Int = 205,
 	var queue: ArrayList<Song>,
+	var sortedQueue: ArrayList<Song>,
 	var queuePosition: Int,
 	var songDurationPosition: Int = 0
 )

@@ -9,6 +9,7 @@ import ml.dcxo.x.obwei.viewModel.Tracklist
 @Dao interface QueueDAO {
 
 	@Query("SELECT * FROM queue WHERE primaryKey = 205") fun getQueue(): Queue?
+	@Query("SELECT * FROM queue") fun getAllQueue(): List<Queue>?
 	@Query("UPDATE queue SET queuePosition = :queuePosition WHERE primaryKey = 205")
 	fun updateQueuePosition(queuePosition: Int)
 	@Query("UPDATE queue SET queue = :queue WHERE primaryKey = 205") fun updateQueue(queue: Tracklist)

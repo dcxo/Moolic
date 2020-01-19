@@ -2,12 +2,16 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
 	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
 	android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+	android:fitsSystemWindows="true">
 
 	<com.google.android.material.appbar.AppBarLayout
+		android:id="@+id/appBar"
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content">
+		android:layout_height="wrap_content"
+		android:fitsSystemWindows="true">
 			<androidx.appcompat.widget.Toolbar
 				android:id="@+id/toolbar"
 				android:layout_width="match_parent"
@@ -16,17 +20,43 @@
 	</com.google.android.material.appbar.AppBarLayout>
 
 	<com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
-        android:id="@+id/recyclerNav"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="false"
+		android:id="@+id/recyclerNav"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
 		android:layout_marginBottom="0dp"
-		app:fastScrollPopupTextColor="#afff"
+		android:clipToPadding="false"
+		app:fastScrollAutoHide="true"
 		app:fastScrollPopupBgColor="@color/colorAccent"
+		app:fastScrollPopupTextColor="#afff"
 		app:fastScrollThumbColor="@color/colorAccent"
 		app:fastScrollTrackColor="@android:color/transparent"
-		app:fastScrollAutoHide="true"
-		app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+		app:layout_behavior="@string/appbar_scrolling_view_behavior"
+		tools:listitem="@layout/item_artist" />
+
+	<RelativeLayout
+		android:id="@+id/noContentView"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:visibility="gone">
+
+		<TextView
+			android:id="@+id/noContentMsg"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_centerInParent="true"
+			android:textAppearance="@style/TextAppearance.Obwei.Headline2"
+			android:text="@string/no_songs_found"/>
+
+		<ImageView
+			android:id="@+id/noContentImage"
+			android:layout_width="75dp"
+			android:layout_height="100dp"
+			android:tint="@color/light_gray"
+			app:srcCompat="@drawable/icon_warning"
+			android:layout_above="@id/noContentMsg"
+			android:layout_centerHorizontal="true"/>
+
+	</RelativeLayout>
 
 	<com.google.android.material.floatingactionbutton.FloatingActionButton
 		android:id="@+id/fabNav"

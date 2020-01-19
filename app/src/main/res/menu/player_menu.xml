@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto">
+
+	<item
+		android:id="@+id/eqOption"
+		android:title="@string/eq"
+		android:tooltipText="@string/eq"
+		android:icon="@drawable/icon_eq"
+		app:showAsAction="ifRoom"/>
+	<item
+		android:id="@+id/editMetadataOption"
+		android:title="@string/editMetadata"
+		android:tooltipText="@string/editMetadata"
+		android:icon="@drawable/icon_edit"
+		app:showAsAction="never"/>
+	<item
+		android:visible="false"
+		android:id="@+id/shareOption"
+		android:title="@string/share"
+		android:tooltipText="@string/share"
+		android:icon="@drawable/icon_share"
+		app:showAsAction="ifRoom"/>
+	<item
+		android:id="@+id/savePlaylistOption"
+		android:title="@string/save_queue"
+		android:tooltipText="@string/save_queue"
+		android:icon="@drawable/icon_save"
+		app:showAsAction="never"/>
+	<item
+		android:id="@+id/removeOption"
+		android:title="@string/delete_queue"
+		android:tooltipText="@string/delete_queue"
+		android:icon="@drawable/icon_delete"
+		app:showAsAction="never"/>
+
+</menu>

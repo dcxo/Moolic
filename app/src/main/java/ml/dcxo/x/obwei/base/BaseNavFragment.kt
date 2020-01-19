@@ -34,6 +34,8 @@ abstract class BaseNavFragment<Item: Model, Adapter: BaseAdapter<Item, *>>: Base
 	open val click: ((Item, Int)->Unit)? = null
 	open val longClick: ((Item, Int)->Unit)? = null
 	open val touchHelper: ItemTouchHelper? = null
+	open val noContentMessage = R.string.no_songs_found
+	open val noContentImage = R.drawable.icon_songs
 
 	fun View.getAdapter(): Adapter = this.recyclerNav.adapter as Adapter
 
@@ -49,16 +51,27 @@ abstract class BaseNavFragment<Item: Model, Adapter: BaseAdapter<Item, *>>: Base
 			}
 		})
 		getLiveData().observe(this, Observer {
-			view?.getAdapter()?.updateData(it)
+
+			view?.noContentView?.visibility = if (it.isEmpty()) View.VISIBLE else View.GONE
+			view?.recyclerNav?.visibility = if (it.isNotEmpty()) View.VISIBLE else View.GONE
+
+			if (it.isNotEmpty()) view?.getAdapter()?.updateData(it)
 			view?.toolbar?.title = getToolbarTitle()
+
 		})
 
 	}
+
 	override fun editOnCreateView(view: View) {
 
 		val (adapter, lManager) = getAdapterAndLayoutManager(view.context)
 
-		view.toolbar.updatePadding(top = statusBarSize)
+		view.appBar.setOnApplyWindowInsetsListener { v, insets ->
+
+			(this.view ?: view).toolbar?.updatePadding(top = insets.systemWindowInsetTop)
+
+			return@setOnApplyWindowInsetsListener insets
+		}
 		view.toolbar.inflateMenu(R.menu.search_menu)
 		view.toolbar.title = getToolbarTitle()
 		(view.toolbar.menu.findItem(R.id.searchOption).actionView as SearchView).setOnQueryTextListener(this)
@@ -68,6 +81,9 @@ abstract class BaseNavFragment<Item: Model, Adapter: BaseAdapter<Item, *>>: Base
 			longClick = this@BaseNavFragment.longClick
 		}
 		view.recyclerNav.layoutManager = lManager
+
+		view.noContentMsg.setText(noContentMessage)
+		view.noContentImage.setImageResource(noContentImage)
 
 		view.fabNav.hide()
 		view.fabNav.setOnClickListener {

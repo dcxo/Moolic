@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+	xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:app="http://schemas.android.com/apk/res-auto"
+	xmlns:tools="http://schemas.android.com/tools"
+	android:layout_height="match_parent"
+	android:layout_width="match_parent">
+
+	<com.google.android.material.textfield.TextInputLayout
+		android:id="@+id/mdSongTitle"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_margin="4dp"
+		android:hint="@string/song_title"
+		app:hintEnabled="true"
+		android:nextFocusDown="@id/albumTitle"
+		app:layout_constraintLeft_toLeftOf="parent"
+		app:layout_constraintRight_toRightOf="parent"
+		app:layout_constraintTop_toTopOf="parent">
+
+		<com.google.android.material.textfield.TextInputEditText
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:maxLines="1"
+			android:scrollHorizontally="true"
+			app:layout_constraintLeft_toLeftOf="parent"
+			app:layout_constraintRight_toRightOf="parent"
+			app:layout_constraintTop_toTopOf="parent" />
+	</com.google.android.material.textfield.TextInputLayout>
+
+	<com.google.android.material.textfield.TextInputLayout
+		android:id="@+id/albumTitle"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_margin="4dp"
+		android:hint="@string/album_title"
+		android:nextFocusDown="@id/artistName"
+		app:hintEnabled="true"
+		app:layout_constraintLeft_toLeftOf="parent"
+		app:layout_constraintRight_toRightOf="parent"
+		app:layout_constraintTop_toBottomOf="@+id/mdSongTitle">
+
+		<com.google.android.material.textfield.TextInputEditText
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:maxLines="1"
+			android:scrollHorizontally="true"
+			app:layout_constraintLeft_toLeftOf="parent"
+			app:layout_constraintRight_toRightOf="parent"
+			app:layout_constraintTop_toTopOf="parent" />
+	</com.google.android.material.textfield.TextInputLayout>
+
+	<com.google.android.material.textfield.TextInputLayout
+		android:id="@+id/artistName"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_margin="4dp"
+		android:hint="@string/artist_name"
+		android:nextFocusDown="@id/year"
+		app:hintEnabled="true"
+		app:layout_constraintLeft_toLeftOf="parent"
+		app:layout_constraintRight_toRightOf="parent"
+		app:layout_constraintTop_toBottomOf="@+id/albumTitle">
+
+		<com.google.android.material.textfield.TextInputEditText
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:maxLines="1"
+			android:scrollHorizontally="true"
+			app:layout_constraintLeft_toLeftOf="parent"
+			app:layout_constraintRight_toRightOf="parent"
+			app:layout_constraintTop_toTopOf="parent" />
+	</com.google.android.material.textfield.TextInputLayout>
+
+	<com.google.android.material.textfield.TextInputLayout
+		android:id="@+id/year"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_margin="4dp"
+		android:hint="@string/year"
+		android:maxLines="1"
+		android:scrollHorizontally="true"
+		android:nextFocusDown="@id/trackNumber"
+		app:hintEnabled="true"
+		app:layout_constraintLeft_toLeftOf="parent"
+		app:layout_constraintRight_toLeftOf="@id/trackNumber"
+		app:layout_constraintTop_toBottomOf="@+id/artistName">
+
+		<com.google.android.material.textfield.TextInputEditText
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:inputType="number"
+			app:layout_constraintLeft_toLeftOf="parent"
+			app:layout_constraintRight_toRightOf="parent"
+			app:layout_constraintTop_toTopOf="parent" />
+	</com.google.android.material.textfield.TextInputLayout>
+
+	<com.google.android.material.textfield.TextInputLayout
+		android:id="@+id/trackNumber"
+		android:layout_width="0dp"
+		android:layout_height="wrap_content"
+		android:layout_margin="4dp"
+		android:hint="@string/track_number"
+		app:helperText="@string/trackHelper"
+		app:hintEnabled="true"
+		app:layout_constraintLeft_toRightOf="@id/year"
+		app:layout_constraintRight_toRightOf="parent"
+		app:layout_constraintTop_toBottomOf="@+id/artistName">
+
+		<com.google.android.material.textfield.TextInputEditText
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:inputType="number"
+			android:maxLines="1"
+			android:scrollHorizontally="true"
+			app:layout_constraintLeft_toLeftOf="parent"
+			app:layout_constraintRight_toRightOf="parent"
+			app:layout_constraintTop_toTopOf="parent" />
+	</com.google.android.material.textfield.TextInputLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

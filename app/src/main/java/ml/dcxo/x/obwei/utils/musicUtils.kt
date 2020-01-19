@@ -6,17 +6,10 @@ import android.provider.MediaStore
 import android.widget.Toast
 import androidx.core.content.contentValuesOf
 import kotlinx.coroutines.*
+import ml.dcxo.x.obwei.DispatcherAsyncTask
 import ml.dcxo.x.obwei.viewModel.*
 import java.io.File
 
-fun addToBlacklist(context: Context?, filePaths: List<String>) {
-
-	Settings[context].addToBlacklist(filePaths)
-	/*context?.contentResolver?.notifyChange(
-		MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null
-	)*/
-
-}
 fun removeFromDisk(context: Context?, songs: List<Song>): Boolean {
 
 	var removed = true
@@ -32,7 +25,7 @@ fun removeFromDisk(context: Context?, songs: List<Song>): Boolean {
 			append(")")
 		}
 
-		val removeColumns = withContext(Dispatchers.Default) {
+		val removeColumns = withContext(DispatcherAsyncTask) {
 			context?.contentResolver?.delete(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, where, null)
 		}
 		if (removeColumns != songs.size) removed = false
@@ -50,27 +43,13 @@ fun removeFromDisk(context: Context?, songs: List<Song>): Boolean {
 	return removed
 
 }
-fun editPlaylistName(context: Context?, playlist: Playlist, newName: String) {
 
-	val cv = contentValuesOf(
-		MediaStore.Audio.Playlists.NAME to newName
-	)
+fun addToBlacklist(context: Context?, filePaths: List<String>) {
 
-	context?.contentResolver?.update(
-		MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, cv,
-		"${MediaStore.Audio.Playlists._ID}=?", arrayOf(playlist.id.toString())
-	)
-	context?.contentResolver?.notifyChange(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null)
-}
-fun removePlaylist(context: Context?, playlist: Playlist) {
-
-	File(playlist.filePath).delete()
-
-	context?.contentResolver?.delete(
-		MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
-		"${MediaStore.Audio.Playlists._ID}=?",
-		arrayOf("${playlist.id}")
-	)
+	Settings[context].addToBlacklist(filePaths)
+	/*context?.contentResolver?.notifyChange(
+		MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null
+	)*/
 
 }
 fun makeBlacklistQuery(context: Context): String {
@@ -171,4 +150,27 @@ fun addToPlaylist(context: Context, songs: Tracklist, playlistId: Int) {
 	context.contentResolver.bulkInsert(tableUri, cvs)
 	context.contentResolver.notifyChange(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null)
 
+}
+fun removePlaylist(context: Context?, playlist: Playlist) {
+
+	File(playlist.filePath).delete()
+
+	context?.contentResolver?.delete(
+		MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI,
+		"${MediaStore.Audio.Playlists._ID}=?",
+		arrayOf("${playlist.id}")
+	)
+
+}
+fun editPlaylistName(context: Context?, playlist: Playlist, newName: String) {
+
+	val cv = contentValuesOf(
+		MediaStore.Audio.Playlists.NAME to newName
+	)
+
+	context?.contentResolver?.update(
+		MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, cv,
+		"${MediaStore.Audio.Playlists._ID}=?", arrayOf(playlist.id.toString())
+	)
+	context?.contentResolver?.notifyChange(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null)
 }

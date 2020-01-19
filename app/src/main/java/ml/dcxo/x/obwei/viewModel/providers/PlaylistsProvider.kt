@@ -48,7 +48,7 @@ object PlaylistsProvider {
 		MediaStore.Audio.Media.DURATION,    //7
 		MediaStore.Audio.Media.DATE_ADDED,  //8
 		MediaStore.Audio.Media.DATA,        //9
-		MediaStore.Audio.Media.TRACK        //10
+		MediaStore.Audio.Media.TRACK       //10
 	)
 
 	fun getPlaylists(ctx: Context): ArrayList<Playlist> {
@@ -120,6 +120,21 @@ object PlaylistsProvider {
 			"${MediaStore.Audio.Media.DATE_ADDED} DESC"
 		)
 
+	}
+	private fun getFavoriteSongsCursor(ctx: Context): Cursor? {
+		val date = Date().time/1000
+		val coerce = System.currentTimeMillis()/1000 - TimeUnit.DAYS.toSeconds(61)
+
+		val where =
+			"${makeBlacklistQuery(ctx)} and ${MediaStore.Audio.Media.DATE_ADDED} between $coerce and $date"
+
+		return ctx.contentResolver.query(
+			MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+			lastAddedProjection,
+			where,
+			null,
+			"${MediaStore.Audio.Media.DATE_ADDED} DESC"
+		)
 	}
 
 	private fun createPlaylist(ctx: Context, cursor: Cursor): Playlist {
